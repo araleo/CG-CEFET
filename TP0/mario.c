@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
     glutInitWindowSize(400, 400);
     glutInitWindowPosition(100, 100);
 
-    glutCreateWindow("Carregando textura com SOIL");
+    glutCreateWindow("Carregando textura com SOIL - Leonardo Mendes de Araujo");
 
     glutReshapeFunc(redimensiona);
     glutKeyboardFunc(teclado);
