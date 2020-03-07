@@ -40,8 +40,7 @@ void liberaMemoria(cor **v) {
     free(v);
 }
 
-void desenhaQuadrado(int x, int y, int i) {
-    cor* color = VETOR_CORES[i];
+void desenhaQuadrado(int x, int y, cor* color) {
     glColor3f(color->vermelho, color->verde, color->azul);
     glBegin(GL_TRIANGLE_FAN);
         glVertex3f(x, y, 0);
@@ -55,7 +54,7 @@ void desenharMinhaCena() {
     glClear(GL_COLOR_BUFFER_BIT);
     int x, y = 0;
     for (int i = 0; i < QUANTIDADE_QUADRADOS; i++) {
-        desenhaQuadrado(x, y, i);
+        desenhaQuadrado(x, y, VETOR_CORES[i]);
         x += COMPRIMENTO_LADO;
         if ((i+1) % QUADRADOS_POR_LINHA == 0) {
             x = 0;
@@ -115,7 +114,7 @@ int main(int argc, char** argv) {
     glutMainLoop();
 
     // libera memoria do vetor de cores
-    // liberaMemoria(VETOR_CORES);
+    liberaMemoria(VETOR_CORES);
 
     return 0;
 }
