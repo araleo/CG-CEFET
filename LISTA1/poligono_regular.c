@@ -14,7 +14,9 @@ void desenharMinhaCena() {
     glColor3f(0.5, 0.8, 0.8);
     glBegin(GL_LINE_LOOP);
         for (int i = 0; i < NUM_LADOS; i++) {
-            glVertex3f(RAIO * cos(2 * (i+1) * M_PI / NUM_LADOS), RAIO * sin(2 * (i+1) * M_PI / NUM_LADOS), 0);
+            // y = r * cos ((2 * numeroDoVertice) * PI / numeroDeLados)
+            // x = r * sen ((2 * numeroDoVertice) * PI / numeroDeLados)
+            glVertex3f(RAIO * cos(2 * (i) * M_PI / NUM_LADOS), RAIO * sin(2 * (i) * M_PI / NUM_LADOS), 0);
         }
     glEnd();
     glFlush();
@@ -39,21 +41,21 @@ void teclaPressionada(unsigned char key, int x, int y) {
         case 27:
             exit(0);
             break;
-        case '+':
+        case '+': // aumenta o número de lados do polígono
             NUM_LADOS += 1;
             glutPostRedisplay();
             break;
-        case '-':
+        case '-': // diminui o número de lados
             if (NUM_LADOS > 3)
                 NUM_LADOS -= 1;
             glutPostRedisplay();
             break;
-        case '*':
+        case '*': // aumenta a distância dos vértices até o centro
             if (RAIO < 50)
                 RAIO += 0.5;
             glutPostRedisplay();
             break;
-        case '/':
+        case '/': // diminui a distância dos vérticos até o centro
             if (RAIO > 10)
                 RAIO -= 0.5;
             glutPostRedisplay();

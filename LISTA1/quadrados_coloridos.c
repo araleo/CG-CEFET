@@ -23,7 +23,6 @@ int LARGURA_DO_MUNDO = QUADRADOS_POR_LINHA * COMPRIMENTO_LADO;
 int ALTURA_DO_MUNDO = QUADRADOS_POR_COLUNA * COMPRIMENTO_LADO;
 
 void sorteiaCores() {
-    srand(time(0));
     VETOR_CORES = (cor **)malloc(QUANTIDADE_QUADRADOS * sizeof(cor));
     for (int i = 0; i < QUANTIDADE_QUADRADOS; i++) {
         VETOR_CORES[i] = (cor *)malloc(sizeof(cor));
@@ -100,6 +99,7 @@ int main(int argc, char** argv) {
     glutCreateWindow("Quadrados coloridos");
 
     // inicializa vetor de cores
+    srand(time(0));
     sorteiaCores();
 
     // registro de callbacks
