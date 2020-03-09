@@ -14,8 +14,8 @@ void desenharMinhaCena() {
     glColor3f(0.5, 0.8, 0.8);
     glBegin(GL_LINE_LOOP);
         for (int i = 0; i < NUM_LADOS; i++) {
-            // y = r * cos ((2 * numeroDoVertice) * PI / numeroDeLados)
-            // x = r * sen ((2 * numeroDoVertice) * PI / numeroDeLados)
+            // x = r * cos ((2 * numeroDoVertice) * PI / numeroDeLados)
+            // y = r * sen ((2 * numeroDoVertice) * PI / numeroDeLados)
             glVertex3f(RAIO * cos(2 * (i) * M_PI / NUM_LADOS), RAIO * sin(2 * (i) * M_PI / NUM_LADOS), 0);
         }
     glEnd();
