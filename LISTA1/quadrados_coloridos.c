@@ -8,7 +8,8 @@
 #define QUADRADOS_POR_COLUNA 3
 #define COMPRIMENTO_LADO 30
 
-typedef struct {
+typedef struct
+{
     float vermelho, verde, azul;
 } cor;
 
@@ -22,9 +23,11 @@ int QUANTIDADE_QUADRADOS = QUADRADOS_POR_LINHA * QUADRADOS_POR_COLUNA;
 int LARGURA_DO_MUNDO = QUADRADOS_POR_LINHA * COMPRIMENTO_LADO;
 int ALTURA_DO_MUNDO = QUADRADOS_POR_COLUNA * COMPRIMENTO_LADO;
 
-void sorteiaCores() {
+void sorteiaCores()
+{
     VETOR_CORES = (cor **)malloc(QUANTIDADE_QUADRADOS * sizeof(cor));
-    for (int i = 0; i < QUANTIDADE_QUADRADOS; i++) {
+    for (int i = 0; i < QUANTIDADE_QUADRADOS; i++)
+    {
         VETOR_CORES[i] = (cor *)malloc(sizeof(cor));
         VETOR_CORES[i]->vermelho = (double)rand() / (double)RAND_MAX;
         VETOR_CORES[i]->verde = (double)rand() / (double)RAND_MAX;
@@ -32,14 +35,15 @@ void sorteiaCores() {
     }
 }
 
-void liberaMemoria(cor **v) {
-    for (int i = 0; i < QUANTIDADE_QUADRADOS; i++) {
+void liberaMemoria(cor **v)
+{
+    for (int i = 0; i < QUANTIDADE_QUADRADOS; i++)
         free(v[i]);
-    }
     free(v);
 }
 
-void desenhaQuadrado(int x, int y, cor* color) {
+void desenhaQuadrado(int x, int y, cor* color)
+{
     glColor3f(color->vermelho, color->verde, color->azul);
     glBegin(GL_TRIANGLE_FAN);
         glVertex3f(x, y, 0);
@@ -49,13 +53,16 @@ void desenhaQuadrado(int x, int y, cor* color) {
     glEnd();
 }
 
-void desenharMinhaCena() {
+void desenharMinhaCena()
+{
     glClear(GL_COLOR_BUFFER_BIT);
     int x, y = 0;
-    for (int i = 0; i < QUANTIDADE_QUADRADOS; i++) {
+    for (int i = 0; i < QUANTIDADE_QUADRADOS; i++)
+    {
         desenhaQuadrado(x, y, VETOR_CORES[i]);
         x += COMPRIMENTO_LADO;
-        if ((i+1) % QUADRADOS_POR_LINHA == 0) {
+        if ((i+1) % QUADRADOS_POR_LINHA == 0)
+        {
             x = 0;
             y += COMPRIMENTO_LADO;
         }
@@ -63,11 +70,13 @@ void desenharMinhaCena() {
     glFlush();
 }
 
-void inicializa() {
+void inicializa()
+{
     glClearColor(1.0, 1.0, 1.0, 1.0);
 }
 
-void redimensionada(int w, int h) {
+void redimensionada(int w, int h)
+{
     glViewport(0, 0, w, h);
 
     glMatrixMode(GL_PROJECTION);
@@ -78,7 +87,8 @@ void redimensionada(int w, int h) {
     glLoadIdentity();
 }
 
-void teclaPressionada(unsigned char key, int x, int y) {
+void teclaPressionada(unsigned char key, int x, int y)
+{
     switch(key) {
         case 27:
             exit(0);
@@ -88,7 +98,8 @@ void teclaPressionada(unsigned char key, int x, int y) {
     }
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
     // inicialização do glut
     glutInit(&argc, argv);
     glutInitContextVersion(1, 1);

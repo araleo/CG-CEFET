@@ -9,25 +9,27 @@
 int NUM_LADOS = 4;
 double RAIO = 40.0;
 
-void desenharMinhaCena() {
+void desenharMinhaCena()
+{
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(0.5, 0.8, 0.8);
     glBegin(GL_LINE_LOOP);
-        for (int i = 0; i < NUM_LADOS; i++) {
-            // x = r * cos ((2 * numeroDoVertice) * PI / numeroDeLados)
-            // y = r * sen ((2 * numeroDoVertice) * PI / numeroDeLados)
+        // x = r * cos ((2 * numeroDoVertice) * PI / numeroDeLados)
+        // y = r * sen ((2 * numeroDoVertice) * PI / numeroDeLados)
+        for (int i = 0; i < NUM_LADOS; i++)
             glVertex3f(RAIO * cos(2 * (i) * M_PI / NUM_LADOS), RAIO * sin(2 * (i) * M_PI / NUM_LADOS), 0);
-        }
     glEnd();
     glFlush();
 }
 
-void inicializa() {
+void inicializa()
+{
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glLineWidth(2);
 }
 
-void redimensionada(int w, int h) {
+void redimensionada(int w, int h)
+{
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -36,7 +38,8 @@ void redimensionada(int w, int h) {
     glLoadIdentity();
 }
 
-void teclaPressionada(unsigned char key, int x, int y) {
+void teclaPressionada(unsigned char key, int x, int y)
+{
     switch(key) {
         case 27:
             exit(0);
@@ -65,7 +68,8 @@ void teclaPressionada(unsigned char key, int x, int y) {
     }
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
     // inicialização do glut
     glutInit(&argc, argv);
     glutInitContextVersion(1, 1);
