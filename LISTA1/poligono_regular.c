@@ -1,7 +1,6 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <math.h>
-#include <stdio.h>
 
 #define LARGURA_DO_MUNDO 100
 #define ALTURA_DO_MUNDO 100
@@ -14,10 +13,10 @@ void desenharMinhaCena()
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(0.5, 0.8, 0.8);
     glBegin(GL_LINE_LOOP);
-        // x = r * cos ((2 * numeroDoVertice) * PI / numeroDeLados)
-        // y = r * sen ((2 * numeroDoVertice) * PI / numeroDeLados)
         for (int i = 0; i < NUM_LADOS; i++)
             glVertex3f(RAIO * cos(2 * (i) * M_PI / NUM_LADOS), RAIO * sin(2 * (i) * M_PI / NUM_LADOS), 0);
+            // x = r * cos ((2 * numeroDoVertice) * PI / numeroDeLados)
+            // y = r * sen ((2 * numeroDoVertice) * PI / numeroDeLados)
     glEnd();
     glFlush();
 }

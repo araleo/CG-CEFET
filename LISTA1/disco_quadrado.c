@@ -8,7 +8,6 @@
 
 int LINHAS = FALSE;
 
-
 void desenhaQuadradoFurado()
 {
     glBegin(GL_TRIANGLE_STRIP);
@@ -45,7 +44,6 @@ void desenharMinhaCena()
         glColor3f(0, 0, 0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         desenhaQuadradoFurado();
-        glColor3f(0.5, 0.8, 0.8);
     }
     glFlush();
 }
