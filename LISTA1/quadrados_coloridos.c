@@ -1,6 +1,5 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -17,18 +16,18 @@ typedef struct
 cor** VETOR_CORES = NULL;
 
 // quantidade de quadrados como variavel global
-int QUANTIDADE_QUADRADOS = QUADRADOS_POR_LINHA * QUADRADOS_POR_COLUNA;
+const int QUANTIDADE_QUADRADOS = QUADRADOS_POR_LINHA * QUADRADOS_POR_COLUNA;
 
 // dimensoes do mundo como variaveis globais
-int LARGURA_DO_MUNDO = QUADRADOS_POR_LINHA * COMPRIMENTO_LADO;
-int ALTURA_DO_MUNDO = QUADRADOS_POR_COLUNA * COMPRIMENTO_LADO;
+const int LARGURA_DO_MUNDO = QUADRADOS_POR_LINHA * COMPRIMENTO_LADO;
+const int ALTURA_DO_MUNDO = QUADRADOS_POR_COLUNA * COMPRIMENTO_LADO;
 
 void sorteiaCores()
 {
-    VETOR_CORES = (cor **)malloc(QUANTIDADE_QUADRADOS * sizeof(cor));
+    VETOR_CORES = (cor **) malloc(QUANTIDADE_QUADRADOS * sizeof(cor));
     for (int i = 0; i < QUANTIDADE_QUADRADOS; i++)
     {
-        VETOR_CORES[i] = (cor *)malloc(sizeof(cor));
+        VETOR_CORES[i] = (cor *) malloc(sizeof(cor));
         VETOR_CORES[i]->vermelho = (double)rand() / (double)RAND_MAX;
         VETOR_CORES[i]->verde = (double)rand() / (double)RAND_MAX;
         VETOR_CORES[i]->azul = (double)rand() / (double)RAND_MAX;

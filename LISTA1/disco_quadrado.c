@@ -1,6 +1,5 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include <stdio.h>
 
 #define LARGURA_DO_MUNDO 100
 #define ALTURA_DO_MUNDO 100
