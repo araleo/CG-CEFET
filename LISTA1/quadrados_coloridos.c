@@ -44,12 +44,15 @@ void liberaMemoria(cor **v)
 void desenhaQuadrado(int x, int y, cor* color)
 {
     glColor3f(color->vermelho, color->verde, color->azul);
-    glBegin(GL_TRIANGLE_FAN);
-        glVertex3f(x, y, 0);
-        glVertex3f(x+COMPRIMENTO_LADO, y, 0);
-        glVertex3f(x+COMPRIMENTO_LADO, y+COMPRIMENTO_LADO, 0);
-        glVertex3f(x, y+COMPRIMENTO_LADO, 0);
-    glEnd();
+    glPushMatrix();
+        glTranslatef(x, y, 0);
+        glBegin(GL_TRIANGLE_FAN);
+            glVertex2f(0, 0);
+            glVertex2f(COMPRIMENTO_LADO, 0);
+            glVertex2f(COMPRIMENTO_LADO, COMPRIMENTO_LADO);
+            glVertex2f(0, COMPRIMENTO_LADO);
+        glEnd();
+    glPopMatrix();
 }
 
 void desenharMinhaCena()

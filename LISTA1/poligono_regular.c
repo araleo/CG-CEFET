@@ -5,7 +5,7 @@
 #define LARGURA_DO_MUNDO 100
 #define ALTURA_DO_MUNDO 100
 
-int NUM_LADOS = 4;
+int NUM_LADOS = 6;
 double RAIO = 40.0;
 
 void desenharMinhaCena()
@@ -13,10 +13,12 @@ void desenharMinhaCena()
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(0.5, 0.8, 0.8);
     glBegin(GL_LINE_LOOP);
+        double angulo;
         for (int i = 0; i < NUM_LADOS; i++)
-            glVertex3f(RAIO * cos(2 * (i) * M_PI / NUM_LADOS), RAIO * sin(2 * (i) * M_PI / NUM_LADOS), 0);
-            // x = r * cos ((2 * numeroDoVertice) * PI / numeroDeLados)
-            // y = r * sen ((2 * numeroDoVertice) * PI / numeroDeLados)
+        {
+            angulo = 2 * M_PI * i / NUM_LADOS;
+            glVertex3f(RAIO * cos(angulo), RAIO * sin(angulo), 0);
+        }
     glEnd();
     glFlush();
 }

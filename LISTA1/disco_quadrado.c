@@ -7,30 +7,25 @@
 #define FALSE 0
 
 int LINHAS = FALSE;
+int listaQuadradoFurado;
 
-void desenhaQuadradoFurado()
+void criaListaQuadradoFurado()
 {
-    glBegin(GL_TRIANGLE_STRIP);
-        glVertex3f(-40, -40, 0);
-        glVertex3f(-25, -25, 0);
-        glVertex3f(40, -40, 0);
-        glVertex3f(25, -25, 0);
-
-        glVertex3f(40, -40, 0);
-        glVertex3f(25, -25, 0);
-        glVertex3f(40, 40, 0);
-        glVertex3f(25, 25, 0);
-
-        glVertex3f(40, 40, 0);
-        glVertex3f(25, 25, 0);
-        glVertex3f(-40, 40, 0);
-        glVertex3f(-25, 25, 0);
-
-        glVertex3f(-40, 40, 0);
-        glVertex3f(-25, 25, 0);
-        glVertex3f(-40, -40, 0);
-        glVertex3f(-25, -25, 0);
-    glEnd();
+    listaQuadradoFurado = glGenLists(1);
+    glNewList(listaQuadradoFurado, GL_COMPILE);
+        glBegin(GL_TRIANGLE_STRIP);
+            glVertex3f(-40, -40, 0);
+            glVertex3f(-25, -25, 0);
+            glVertex3f(40, -40, 0);
+            glVertex3f(25, -25, 0);
+            glVertex3f(40, 40, 0);
+            glVertex3f(25, 25, 0);
+            glVertex3f(-40, 40, 0);
+            glVertex3f(-25, 25, 0);
+            glVertex3f(-40, -40, 0);
+            glVertex3f(-25, -25, 0);
+        glEnd();
+    glEndList();
 }
 
 void desenharMinhaCena()
@@ -38,12 +33,12 @@ void desenharMinhaCena()
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(0.5, 0.8, 0.8);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    desenhaQuadradoFurado();
+    glCallList(listaQuadradoFurado);
     if (LINHAS)
     {
         glColor3f(0, 0, 0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        desenhaQuadradoFurado();
+        glCallList(listaQuadradoFurado);
     }
     glFlush();
 }
@@ -77,6 +72,7 @@ void teclaPressionada(unsigned char key, int x, int y)
 void inicializa()
 {
     glClearColor(1.0, 1.0, 1.0, 1.0);
+    criaListaQuadradoFurado();
     glLineWidth(2);
 }
 
