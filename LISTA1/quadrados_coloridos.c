@@ -15,10 +15,7 @@ typedef struct
 // vetor de cores como variavel global
 cor** VETOR_CORES = NULL;
 
-// quantidade de quadrados como variavel global
 const int QUANTIDADE_QUADRADOS = QUADRADOS_POR_LINHA * QUADRADOS_POR_COLUNA;
-
-// dimensoes do mundo como variaveis globais
 const int LARGURA_DO_MUNDO = QUADRADOS_POR_LINHA * COMPRIMENTO_LADO;
 const int ALTURA_DO_MUNDO = QUADRADOS_POR_COLUNA * COMPRIMENTO_LADO;
 

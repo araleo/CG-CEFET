@@ -46,9 +46,11 @@ void desenharMinhaCena()
 void redimensionada(int w, int h)
 {
     glViewport(0, 0, w, h);
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(-LARGURA_DO_MUNDO/2, LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, -1, 1);
+    
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
