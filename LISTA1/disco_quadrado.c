@@ -50,7 +50,7 @@ void redimensionada(int w, int h)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(-LARGURA_DO_MUNDO/2, LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, -1, 1);
-    
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
@@ -63,7 +63,7 @@ void teclaPressionada(unsigned char key, int x, int y)
             break;
         case 'c':
         case 'C':
-            LINHAS ^= 1;
+            LINHAS ^= TRUE;
             glutPostRedisplay();
             break;
         default:
