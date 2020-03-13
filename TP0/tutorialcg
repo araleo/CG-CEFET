@@ -9,6 +9,6 @@ sudo apt install libsoil-dev
 Na hora de compilar os programas, não se esqueça de linkar as bibliotecas.
 
 gcc main.c -lGL -lglut
-gcc mario.c -lGL -lGLU -lglut -SOIL
+gcc mario.c -lGL -lGLU -lglut -lSOIL
 
 
