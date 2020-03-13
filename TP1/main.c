@@ -3,41 +3,37 @@
 #include <GL/freeglut.h>
 #include <stdio.h>
 
+#include "estruturas.h"
+
 #define ALTURA_DO_MUNDO 200
 #define LARGURA_DO_MUNDO 200
 
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
 
-typedef struct naveStruct {
-    float posX;
-    float posY;
-    int altura;
-    int largura;
-} navinha;
-
 navinha jogador;
+navinha inimigo;
 
-void desenhaNavinha(navinha nave)
+void desenhaSprite(tipoSprite sprite)
 {
     glBindTexture(GL_TEXTURE_2D, idTexturaSheet);
     glPushMatrix();
-        glTranslatef(nave.posX, nave.posY, 0);
+        glTranslatef(sprite.posicao.x, sprite.posicao.y, 0);
         glBegin(GL_TRIANGLE_FAN);
             // Associamos um canto da textura para cada vértice
             glTexCoord2f(0, 0);
-            glVertex3f(-nave.largura/2, -nave.altura/2, 0);
+            glVertex3f(-sprite.dimensoes.x/2, -sprite.dimensoes.y/2, 0);
 
             glTexCoord2f(0.108, 0);
-            glVertex3f(nave.largura/2, -nave.altura/2, 0);
+            glVertex3f(sprite.dimensoes.x/2, -sprite.dimensoes.y/2, 0);
 
             glTexCoord2f(0.108, 0.081);
-            glVertex3f(nave.largura/2, nave.altura/2, 0);
+            glVertex3f(sprite.dimensoes.x/2, sprite.dimensoes.y/2, 0);
 
             glTexCoord2f(0, 0.081);
-            glVertex3f(-nave.largura/2, nave.altura/2, 0);
+            glVertex3f(-sprite.dimensoes.x/2, sprite.dimensoes.y/2, 0);
         glEnd();
-        glPopMatrix();
+    glPopMatrix();
 }
 
 void desenhaFundoJogo()
@@ -69,7 +65,8 @@ void desenharMinhaCena()
     // habilita texturas
     glEnable(GL_TEXTURE_2D);
     desenhaFundoJogo();
-    desenhaNavinha(jogador);
+    desenhaSprite(jogador.sprite);
+    desenhaSprite(inimigo.sprite);
     glDisable(GL_TEXTURE_2D);
 
     glutSwapBuffers();
@@ -90,12 +87,23 @@ GLuint carregaTextura(const char* arquivo)
     return idTextura;
 }
 
+void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, float altura) {
+    sprite->posicao.x = x;
+    sprite->posicao.y = y;
+    sprite->dimensoes.x = comprimento;
+    sprite->dimensoes.y = altura;
+}
+
+void inicializaInimigo()
+{
+    inicializaSprite(&inimigo.sprite, 0, ALTURA_DO_MUNDO * 0.4, 20, 20);
+    inimigo.velocidade = 1;
+}
+
 void inicializaJogador()
 {
-    jogador.posX = 0;
-    jogador.posY = -ALTURA_DO_MUNDO * 0.4;
-    jogador.altura = 20;
-    jogador.largura = 20;
+    inicializaSprite(&jogador.sprite, 0, -ALTURA_DO_MUNDO * 0.4, 20, 20);
+    jogador.velocidade = 2;
 }
 
 void redimensiona(int w, int h)
@@ -117,12 +125,18 @@ void teclaPressionada(unsigned char key, int x, int y)
             exit(0);
             break;
         case 'a':
-            jogador.posX -= 1;
-            glutPostRedisplay();
+            if (jogador.sprite.posicao.x > -ALTURA_DO_MUNDO/2 + jogador.sprite.dimensoes.x/2)
+            {
+                jogador.sprite.posicao.x -= jogador.velocidade;
+                glutPostRedisplay();
+            }
             break;
         case 'd':
-            jogador.posX += 1;
-            glutPostRedisplay();
+            if (jogador.sprite.posicao.x < ALTURA_DO_MUNDO/2 - jogador.sprite.dimensoes.x/2)
+            {
+                jogador.sprite.posicao.x += jogador.velocidade;
+                glutPostRedisplay();
+            }
             break;
         default:
             break;
@@ -163,6 +177,7 @@ int main(int argc, char** argv)
 
     // inicializa variaveis do jogo
     inicializaJogador();
+    inicializaInimigo();
 
     // main loop
     glutMainLoop();
