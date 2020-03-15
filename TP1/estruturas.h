@@ -1,12 +1,12 @@
-typedef struct vetorStruct
+typedef struct vetor2dStruct
 {
     float x, y;
-} tipoVetor;
+} tipoVetor2d;
 
 typedef struct spriteStruct
 {
-    tipoVetor posicao;
-    tipoVetor dimensoes;
+    tipoVetor2d posicao;
+    tipoVetor2d dimensoes;
     int textura;
 } tipoSprite;
 
@@ -14,4 +14,10 @@ typedef struct naveStruct
 {
     tipoSprite sprite;
     int velocidade;
-} navinha;
+} tipoNave;
+
+typedef struct tiroStruct
+{
+    tipoSprite sprite;
+    int velocidade;
+} tipoTiro;

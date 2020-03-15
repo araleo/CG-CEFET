@@ -2,7 +2,6 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <stdio.h>
-
 #include "estruturas.h"
 
 #define ALTURA_DO_MUNDO 200
@@ -11,10 +10,10 @@
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
 
-navinha jogador;
-navinha inimigo;
+tipoNave jogador;
+tipoNave inimigo;
 
-void desenhaSprite(tipoSprite sprite)
+void desenhaSprite(tipoSprite sprite, float sheetX, float sheetY)
 {
     glBindTexture(GL_TEXTURE_2D, idTexturaSheet);
     glPushMatrix();
@@ -24,13 +23,13 @@ void desenhaSprite(tipoSprite sprite)
             glTexCoord2f(0, 0);
             glVertex3f(-sprite.dimensoes.x/2, -sprite.dimensoes.y/2, 0);
 
-            glTexCoord2f(0.108, 0);
+            glTexCoord2f(sheetX, 0);
             glVertex3f(sprite.dimensoes.x/2, -sprite.dimensoes.y/2, 0);
 
-            glTexCoord2f(0.108, 0.081);
+            glTexCoord2f(sheetX, sheetY);
             glVertex3f(sprite.dimensoes.x/2, sprite.dimensoes.y/2, 0);
 
-            glTexCoord2f(0, 0.081);
+            glTexCoord2f(0, sheetY);
             glVertex3f(-sprite.dimensoes.x/2, sprite.dimensoes.y/2, 0);
         glEnd();
     glPopMatrix();
@@ -65,8 +64,8 @@ void desenharMinhaCena()
     // habilita texturas
     glEnable(GL_TEXTURE_2D);
     desenhaFundoJogo();
-    desenhaSprite(jogador.sprite);
-    desenhaSprite(inimigo.sprite);
+    desenhaSprite(jogador.sprite, 0.108, 0.081);
+    desenhaSprite(inimigo.sprite, 0.423, 0.081);
     glDisable(GL_TEXTURE_2D);
 
     glutSwapBuffers();
