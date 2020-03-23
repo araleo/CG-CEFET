@@ -16,7 +16,7 @@ tipoSprite blocos[27]; //BRUNA: Criei um vetor do tipo tipoSprite
 
 void fazquadrado(tipoSprite blocos) //BRUNA: Desenhas os blocos na tela
 {
-    glColor3f (0,1,0);
+    glColor3f(0,1,0);
     glBegin(GL_TRIANGLE_FAN);
         glVertex3f(blocos.posicao.x, blocos.posicao.y, 0);
         glVertex3f(blocos.posicao.x + blocos.dimensoes.x, blocos.posicao.y, 0);
@@ -138,7 +138,8 @@ GLuint carregaTextura(const char* arquivo)
     return idTextura;
 }
 
-void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, float altura) {
+void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, float altura)
+{
     sprite->posicao.x = x;
     sprite->posicao.y = y;
     sprite->dimensoes.x = comprimento;
