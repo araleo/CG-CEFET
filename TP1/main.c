@@ -12,72 +12,36 @@ GLuint idTexturaSheet;
 
 tipoNave jogador;
 tipoNave inimigo;
-tipoSprite blocos[27]; //BRUNA: Criei um vetor do tipo tipoSprite
 
-void fazquadrado(tipoSprite blocos) //BRUNA: Desenhas os blocos na tela
+void movimentaInimigos()
 {
-    glColor3f(0,1,0);
-    glBegin(GL_TRIANGLE_FAN);
-        glVertex3f(blocos.posicao.x, blocos.posicao.y, 0);
-        glVertex3f(blocos.posicao.x + blocos.dimensoes.x, blocos.posicao.y, 0);
-        glVertex3f(blocos.posicao.x + blocos.dimensoes.x, blocos.posicao.y + blocos.dimensoes.y, 0);
-        glVertex3f(blocos.posicao.x, blocos.posicao.y + blocos.dimensoes.y, 0);
-    glEnd();
-} //BRUNA
-
-void desenhaBlocos() //BRUNA: Configura as posições e dimensões dos blocos
-{
-    //glClear (GL_COLOR_BUFFER_BIT);
-    int quadradosPorLinha = 0;
-    int maxQuadradosLinha = 10;
-    int posicaox = 0;
-    int posicaoy = 50;
-    int quantidadeDeFileiras = 0;
-    int quadrados = 0;
-    int incremento = 10;
-
-    while(quantidadeDeFileiras < 3)
-    {
-        while(quadradosPorLinha < maxQuadradosLinha)
-        {
-            blocos[quadrados].posicao.x = posicaox;
-            blocos[quadrados].posicao.y = posicaoy;
-            blocos[quadrados].dimensoes.x = 15;
-            blocos[quadrados].dimensoes.y = 5;
-
-            fazquadrado(blocos[quadrados]);
-            posicaox = posicaox + 20;
-            quadradosPorLinha = quadradosPorLinha + 1;
-            quadrados = quadrados + 1;
-        }
-
-        posicaoy = posicaoy - 10;
-        maxQuadradosLinha = maxQuadradosLinha - 1;
-        quadradosPorLinha = 0;
-        posicaox = incremento;
-        incremento = incremento + 10;
-        quantidadeDeFileiras = quantidadeDeFileiras + 1;
+    if (inimigo.sprite.posicao.x < LARGURA_DO_MUNDO/2 - inimigo.sprite.dimensoes.x/2) {
+        inimigo.sprite.posicao.x += inimigo.velocidade;
+        glutPostRedisplay();
+        glutTimerFunc(33, movimentaInimigos, 33);
+    } else {
+        inimigo.sprite.posicao.x = -LARGURA_DO_MUNDO/2;
+        inimigo.sprite.posicao.y -= 1;
     }
-    // glEnd();
 }
 
-void desenhaSprite(tipoSprite sprite, float sheetX, float sheetY)
+void desenhaSprite(tipoSprite sprite, float sheetX, float sheetY, float comprimento, float altura)
 {
     glBindTexture(GL_TEXTURE_2D, idTexturaSheet);
     glPushMatrix();
         glTranslatef(sprite.posicao.x, sprite.posicao.y, 0);
         glBegin(GL_TRIANGLE_FAN);
             // Associamos um canto da textura para cada vértice
-            glTexCoord2f(0, 0);
+            glTexCoord2f(sheetX, sheetY);
             glVertex3f(-sprite.dimensoes.x/2, -sprite.dimensoes.y/2, 0);
 
-            glTexCoord2f(sheetX, 0);
+            glTexCoord2f(sheetX + comprimento, sheetY);
             glVertex3f(sprite.dimensoes.x/2, -sprite.dimensoes.y/2, 0);
 
-            glTexCoord2f(sheetX, sheetY);
+            glTexCoord2f(sheetX + comprimento, sheetY + altura);
             glVertex3f(sprite.dimensoes.x/2, sprite.dimensoes.y/2, 0);
 
-            glTexCoord2f(0, sheetY);
+            glTexCoord2f(sheetX, sheetY + altura);
             glVertex3f(-sprite.dimensoes.x/2, sprite.dimensoes.y/2, 0);
         glEnd();
     glPopMatrix();
@@ -103,7 +67,6 @@ void desenhaFundoJogo()
     glEnd();
 }
 
-
 void desenharMinhaCena()
 {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -114,9 +77,12 @@ void desenharMinhaCena()
 
     // desenhos
     desenhaFundoJogo();
-    desenhaSprite(jogador.sprite, 0.108, 0.081);
-    // desenhaSprite(inimigo.sprite, 0.423, 0.081);
-    desenhaBlocos(); //BRUNA
+    desenhaSprite(jogador.sprite, 0.000, 0.007, 0.109, 0.073);
+    desenhaSprite(inimigo.sprite, 0.413, 0.207, 0.090, 0.082);
+    // desenhaBlocos(); //BRUNA
+
+    // movimentos
+    movimentaInimigos(inimigo);
 
     glDisable(GL_TEXTURE_2D);
 
@@ -132,9 +98,8 @@ GLuint carregaTextura(const char* arquivo)
                         SOIL_FLAG_INVERT_Y);
 
     if (!idTextura)
-    {
         printf("Erro do SOIL: '%s'\n", SOIL_last_result());
-    }
+
     return idTextura;
 }
 
@@ -177,15 +142,13 @@ void teclaPressionada(unsigned char key, int x, int y)
             exit(0);
             break;
         case 'a':
-            if (jogador.sprite.posicao.x > -ALTURA_DO_MUNDO/2 + jogador.sprite.dimensoes.x/2)
-            {
+            if (jogador.sprite.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.sprite.dimensoes.x/2) {
                 jogador.sprite.posicao.x -= jogador.velocidade;
                 glutPostRedisplay();
             }
             break;
         case 'd':
-            if (jogador.sprite.posicao.x < ALTURA_DO_MUNDO/2 - jogador.sprite.dimensoes.x/2)
-            {
+            if (jogador.sprite.posicao.x < LARGURA_DO_MUNDO/2 - jogador.sprite.dimensoes.x/2) {
                 jogador.sprite.posicao.x += jogador.velocidade;
                 glutPostRedisplay();
             }
@@ -214,7 +177,7 @@ int main(int argc, char** argv)
     glutInit(&argc, argv);
     glutInitContextVersion(1, 1);
     glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(100, 100);
     glutCreateWindow("Jogo");
@@ -223,6 +186,7 @@ int main(int argc, char** argv)
     glutDisplayFunc(desenharMinhaCena);
     glutReshapeFunc(redimensiona);
     glutKeyboardFunc(teclaPressionada);
+    glutTimerFunc(0, movimentaInimigos, 33);
 
     // configura variaveis de estado
     inicializa();
