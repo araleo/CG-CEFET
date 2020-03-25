@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include "estruturas.h"
 
+#define TRUE 1
+#define FALSE 0
+
 #define ALTURA_DO_MUNDO 200
 #define LARGURA_DO_MUNDO 200
 
@@ -16,7 +19,10 @@ tipoTiro tiro;
 
 void movimentaTiro()
 {
-    tiro.sprite.posicao.y += 1;
+    if (tiro.sprite.posicao.y > ALTURA_DO_MUNDO/2)
+        tiro.ativo = FALSE;
+
+    tiro.sprite.posicao.y += tiro.velocidade;
     glutPostRedisplay();
     glutTimerFunc(33, movimentaTiro, 33);
 }
@@ -27,9 +33,8 @@ void movimentaInimigos()
         inimigo.sprite.posicao.x += inimigo.velocidade;
     } else {
         inimigo.sprite.posicao.x = -LARGURA_DO_MUNDO/2 + inimigo.sprite.dimensoes.x/2;
-        inimigo.sprite.posicao.y -= 1;
+        inimigo.sprite.posicao.y -= inimigo.sprite.dimensoes.y;
     }
-
     glutPostRedisplay();
     glutTimerFunc(33, movimentaInimigos, 33);
 }
@@ -124,12 +129,13 @@ void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, f
 void inicializaTiro(float x, float y)
 {
     inicializaSprite(&tiro.sprite, x, y, 1, 5);
-    tiro.velocidade = 1;
+    tiro.velocidade = 2;
+    tiro.ativo = TRUE;
 }
 
 void inicializaInimigo()
 {
-    inicializaSprite(&inimigo.sprite, 0, ALTURA_DO_MUNDO * 0.4, 20, 20);
+    inicializaSprite(&inimigo.sprite, 0, ALTURA_DO_MUNDO * 0.4, 15, 15);
     inimigo.velocidade = 0.0005;
 }
 
@@ -170,9 +176,11 @@ void teclaPressionada(unsigned char key, int x, int y)
             }
             break;
         case ' ':
-            inicializaTiro(jogador.sprite.posicao.x, jogador.sprite.posicao.y + jogador.sprite.dimensoes.y/2);
-            desenhaSprite(tiro.sprite, 0.833, 0.339, 0.008, 0.036);
-            glutPostRedisplay();
+            if (!tiro.ativo) {
+                inicializaTiro(jogador.sprite.posicao.x, jogador.sprite.posicao.y + jogador.sprite.dimensoes.y/2);
+                desenhaSprite(tiro.sprite, 0.833, 0.339, 0.008, 0.036);
+                glutPostRedisplay();
+            }
             break;
         default:
             break;

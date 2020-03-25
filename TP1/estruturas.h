@@ -20,4 +20,5 @@ typedef struct tiroStruct
 {
     tipoSprite sprite;
     float velocidade;
+    int ativo;
 } tipoTiro;
