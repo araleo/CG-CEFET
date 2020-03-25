@@ -13,11 +13,11 @@ typedef struct spriteStruct
 typedef struct naveStruct
 {
     tipoSprite sprite;
-    int velocidade;
+    float velocidade;
 } tipoNave;
 
 typedef struct tiroStruct
 {
     tipoSprite sprite;
-    int velocidade;
+    float velocidade;
 } tipoTiro;

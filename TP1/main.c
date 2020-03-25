@@ -12,17 +12,26 @@ GLuint idTexturaSheet;
 
 tipoNave jogador;
 tipoNave inimigo;
+tipoTiro tiro;
+
+void movimentaTiro()
+{
+    tiro.sprite.posicao.y += 1;
+    glutPostRedisplay();
+    glutTimerFunc(33, movimentaTiro, 33);
+}
 
 void movimentaInimigos()
 {
     if (inimigo.sprite.posicao.x < LARGURA_DO_MUNDO/2 - inimigo.sprite.dimensoes.x/2) {
         inimigo.sprite.posicao.x += inimigo.velocidade;
-        glutPostRedisplay();
-        glutTimerFunc(33, movimentaInimigos, 33);
     } else {
-        inimigo.sprite.posicao.x = -LARGURA_DO_MUNDO/2;
+        inimigo.sprite.posicao.x = -LARGURA_DO_MUNDO/2 + inimigo.sprite.dimensoes.x/2;
         inimigo.sprite.posicao.y -= 1;
     }
+
+    glutPostRedisplay();
+    glutTimerFunc(33, movimentaInimigos, 33);
 }
 
 void desenhaSprite(tipoSprite sprite, float sheetX, float sheetY, float comprimento, float altura)
@@ -79,6 +88,7 @@ void desenharMinhaCena()
     desenhaFundoJogo();
     desenhaSprite(jogador.sprite, 0.000, 0.007, 0.109, 0.073);
     desenhaSprite(inimigo.sprite, 0.413, 0.207, 0.090, 0.082);
+    desenhaSprite(tiro.sprite, 0.834, 0.339, 0.008, 0.036);
     // desenhaBlocos(); //BRUNA
 
     // movimentos
@@ -111,10 +121,16 @@ void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, f
     sprite->dimensoes.y = altura;
 }
 
+void inicializaTiro(float x, float y)
+{
+    inicializaSprite(&tiro.sprite, x, y, 1, 5);
+    tiro.velocidade = 1;
+}
+
 void inicializaInimigo()
 {
     inicializaSprite(&inimigo.sprite, 0, ALTURA_DO_MUNDO * 0.4, 20, 20);
-    inimigo.velocidade = 1;
+    inimigo.velocidade = 0.0005;
 }
 
 void inicializaJogador()
@@ -153,6 +169,11 @@ void teclaPressionada(unsigned char key, int x, int y)
                 glutPostRedisplay();
             }
             break;
+        case ' ':
+            inicializaTiro(jogador.sprite.posicao.x, jogador.sprite.posicao.y + jogador.sprite.dimensoes.y/2);
+            desenhaSprite(tiro.sprite, 0.833, 0.339, 0.008, 0.036);
+            glutPostRedisplay();
+            break;
         default:
             break;
     }
@@ -187,6 +208,7 @@ int main(int argc, char** argv)
     glutReshapeFunc(redimensiona);
     glutKeyboardFunc(teclaPressionada);
     glutTimerFunc(0, movimentaInimigos, 33);
+    glutTimerFunc(0, movimentaTiro, 33);
 
     // configura variaveis de estado
     inicializa();
