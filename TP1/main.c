@@ -31,6 +31,9 @@ void movimentaInimigos()
 {
     if (inimigo.sprite.posicao.x < LARGURA_DO_MUNDO/2 - inimigo.sprite.dimensoes.x/2) {
         inimigo.sprite.posicao.x += inimigo.velocidade;
+    } else if (inimigo.sprite.posicao.y <= jogador.sprite.posicao.y) {
+        // TODO
+        // jogador perdeu
     } else {
         inimigo.sprite.posicao.x = -LARGURA_DO_MUNDO/2 + inimigo.sprite.dimensoes.x/2;
         inimigo.sprite.posicao.y -= inimigo.sprite.dimensoes.y;
