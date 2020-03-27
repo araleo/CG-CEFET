@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <stdio.h>
+
 #include "estruturas.h"
 
 #define TRUE 1
