@@ -29,12 +29,14 @@ void movimentaTiro()
 
 void movimentaInimigos()
 {
-    if (inimigo.sprite.posicao.x < LARGURA_DO_MUNDO/2 - inimigo.sprite.dimensoes.x/2) {
-        inimigo.sprite.posicao.x += inimigo.velocidade;
-    } else if (inimigo.sprite.posicao.y <= jogador.sprite.posicao.y) {
-        // TODO
+    if (inimigo.sprite.posicao.y <= jogador.sprite.posicao.y + jogador.sprite.dimensoes.y) {
         // jogador perdeu
+        // TODO
+    } else if (inimigo.sprite.posicao.x < LARGURA_DO_MUNDO/2 - inimigo.sprite.dimensoes.x/2) {
+        // move horizontalmente
+        inimigo.sprite.posicao.x += inimigo.velocidade;
     } else {
+        // move verticalmente e volta para a esquerda da tela
         inimigo.sprite.posicao.x = -LARGURA_DO_MUNDO/2 + inimigo.sprite.dimensoes.x/2;
         inimigo.sprite.posicao.y -= inimigo.sprite.dimensoes.y;
     }
@@ -139,7 +141,8 @@ void inicializaTiro(float x, float y)
 void inicializaInimigo()
 {
     inicializaSprite(&inimigo.sprite, 0, ALTURA_DO_MUNDO * 0.4, 15, 15);
-    inimigo.velocidade = 0.0005;
+    // inimigo.velocidade = 0.0005;
+    inimigo.velocidade = 0.001;
 }
 
 void inicializaJogador()
