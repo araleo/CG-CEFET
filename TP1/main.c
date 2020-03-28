@@ -18,6 +18,15 @@ tipoNave jogador;
 tipoNave inimigo;
 tipoTiro tiro;
 
+
+void detectaTiro()
+{
+    // TODO - isso não da certo
+    if (tiro.sprite.posicao.x + 50 <= inimigo.sprite.posicao.x && tiro.sprite.posicao.y + 50 <= inimigo.sprite.posicao.y) {
+        printf("acertou\n");
+    }
+}
+
 void movimentaTiro()
 {
     if (tiro.sprite.posicao.y > ALTURA_DO_MUNDO/2)
