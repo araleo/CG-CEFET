@@ -245,10 +245,6 @@ int main(int argc, char** argv)
     inicializaJogador();
     inicializaInimigo();
 
-    // teste
-    float a = formulaDistancia(0, 3, 0, 4);
-    printf("%f\n", a);
-
     // main loop
     glutMainLoop();
 

@@ -14,3 +14,6 @@ all: main.o
 
 run: all
 	./jogo
+
+clean:
+	rm *.o
