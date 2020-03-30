@@ -1,22 +1,18 @@
 #include <SOIL/SOIL.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 #include "estruturas.h"
+#include "declaracoes.h"
 
 #define TRUE 1
 #define FALSE 0
 
 #define ALTURA_DO_MUNDO 200
 #define LARGURA_DO_MUNDO 200
-
-float formulaDistancia(float x1, float x2, float y1, float y2);
-void inicializaTiro(tipoSprite* tiro, float x, float y);
-void desenhaSprite(tipoSprite sprite, float sheetX, float sheetY, float comprimento, float altura);
 
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
