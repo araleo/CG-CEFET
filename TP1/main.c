@@ -21,10 +21,13 @@ tipoTiro tiro;
 
 void detectaTiro()
 {
-    // TODO - isso não da certo
-    if (tiro.sprite.posicao.x + 50 <= inimigo.sprite.posicao.x && tiro.sprite.posicao.y + 50 <= inimigo.sprite.posicao.y) {
-        printf("acertou\n");
+    // TODO - isso não é certo
+    if (tiro.ativo) {
+        if (tiro.sprite.posicao.x <= inimigo.sprite.posicao.x + 5 && tiro.sprite.posicao.y <= inimigo.sprite.posicao.y + 5) {
+            printf("acertou\n");
+        }
     }
+
 }
 
 void movimentaTiro()
@@ -33,6 +36,7 @@ void movimentaTiro()
         tiro.ativo = FALSE;
 
     tiro.sprite.posicao.y += tiro.velocidade;
+    detectaTiro();
     glutPostRedisplay();
     glutTimerFunc(33, movimentaTiro, 33);
 }
