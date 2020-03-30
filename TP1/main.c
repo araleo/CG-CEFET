@@ -11,6 +11,8 @@
 #define ALTURA_DO_MUNDO 200
 #define LARGURA_DO_MUNDO 200
 
+float formulaDistancia(float x1, float x2, float y1, float y2);
+
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
 
@@ -18,16 +20,14 @@ tipoNave jogador;
 tipoNave inimigo;
 tipoTiro tiro;
 
-
 void detectaTiro()
 {
-    // TODO - isso não é certo
     if (tiro.ativo) {
-        if (tiro.sprite.posicao.x <= inimigo.sprite.posicao.x + 5 && tiro.sprite.posicao.y <= inimigo.sprite.posicao.y + 5) {
+        float dist = formulaDistancia(tiro.sprite.posicao.x, inimigo.sprite.posicao.x, tiro.sprite.posicao.y, inimigo.sprite.posicao.y);
+        if (dist <= 10) {
             printf("acertou\n");
         }
     }
-
 }
 
 void movimentaTiro()
@@ -244,6 +244,10 @@ int main(int argc, char** argv)
     // inicializa variaveis do jogo
     inicializaJogador();
     inicializaInimigo();
+
+    // teste
+    float a = formulaDistancia(0, 3, 0, 4);
+    printf("%f\n", a);
 
     // main loop
     glutMainLoop();
