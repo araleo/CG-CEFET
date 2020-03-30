@@ -15,6 +15,8 @@
 #define LARGURA_DO_MUNDO 200
 
 float formulaDistancia(float x1, float x2, float y1, float y2);
+void inicializaTiro(tipoSprite* tiro, float x, float y);
+void desenhaSprite(tipoSprite sprite, float sheetX, float sheetY, float comprimento, float altura);
 
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
@@ -26,7 +28,12 @@ tipoSprite tiroInimigo;
 
 void inimigoAtira()
 {
-
+    int sorteiaTiro = rand() % 32000;
+    if (sorteiaTiro == 0 && !tiroInimigo.ativo) {
+        inicializaTiro(&tiroInimigo, inimigo.posicao.x, inimigo.posicao.y);
+        desenhaSprite(tiroInimigo, 0.833, 0.339, 0.008, 0.036);
+        glutPostRedisplay();
+    }
 }
 
 void detectaTiro(tipoSprite* tiro)
@@ -40,6 +47,17 @@ void detectaTiro(tipoSprite* tiro)
             inimigo.posicao.y = 200;
         }
     }
+}
+
+void movimentaTiroInimigo()
+{
+    if (tiroInimigo.posicao.y < -ALTURA_DO_MUNDO/2)
+        tiroInimigo.ativo = FALSE;
+
+    tiroInimigo.posicao.y -= tiroInimigo.velocidade;
+    // detectaTiro(&tiroInimigo);
+    glutPostRedisplay();
+    glutTimerFunc(33, movimentaTiroInimigo, 33);
 }
 
 void movimentaTiroJogador()
@@ -58,14 +76,10 @@ void movimentaInimigos()
     if (inimigo.posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
         // jogador perdeu
         // TODO
-        printf("perdeu\n");
     } else if (inimigo.ativo && inimigo.posicao.x < LARGURA_DO_MUNDO/2 - inimigo.dimensoes.x/2) {
         // move horizontalmente
         inimigo.posicao.x += inimigo.velocidade;
-
-        if (rand() % 99 == 0)
-            inimigoAtira();
-
+        inimigoAtira();
     } else if (inimigo.ativo) {
         // move verticalmente e volta para a esquerda da tela
         inimigo.posicao.x = -LARGURA_DO_MUNDO/2 + inimigo.dimensoes.x/2;
@@ -132,6 +146,9 @@ void desenharMinhaCena()
     if (tiroJogador.ativo)
         desenhaSprite(tiroJogador, 0.834, 0.339, 0.008, 0.036);
 
+    if (tiroInimigo.ativo)
+        desenhaSprite(tiroInimigo, 0.834, 0.339, 0.008, 0.036);
+
     if (inimigo.ativo)
         desenhaSprite(inimigo, 0.413, 0.207, 0.090, 0.082);
 
@@ -171,7 +188,7 @@ void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, f
 
 void inicializaTiro(tipoSprite* tiro, float x, float y)
 {
-    inicializaSprite(&tiroJogador, x, y, 1, 5, 1);
+    inicializaSprite(tiro, x, y, 1, 5, 1);
     tiro->velocidade = 2;
 }
 
@@ -262,6 +279,7 @@ int main(int argc, char** argv)
     glutKeyboardFunc(teclaPressionada);
     glutTimerFunc(0, movimentaInimigos, 33);
     glutTimerFunc(0, movimentaTiroJogador, 33);
+    glutTimerFunc(0, movimentaTiroInimigo, 33);
 
     // configura variaveis de estado
     inicializa();
