@@ -34,14 +34,20 @@ void inimigoAtira()
 
 void detectaTiro(tipoSprite* tiro)
 {
-    if (tiro->ativo) {
-        float dist = formulaDistancia(tiro->posicao.x, inimigo.posicao.x, tiro->posicao.y, inimigo.posicao.y);
-        if (dist <= tiro->raio + inimigo.raio) {
-            inimigo.ativo = FALSE;
-            tiro->ativo = FALSE;
-            inimigo.posicao.x = 200;
-            inimigo.posicao.y = 200;
-        }
+    tipoSprite* alvo;
+
+    if (tiro == &tiroJogador) {
+        alvo = &inimigo;
+    } else if (tiro == &tiroInimigo) {
+        alvo = &jogador;
+    }
+
+    float dist = formulaDistancia(tiro->posicao.x, alvo->posicao.x, tiro->posicao.y, alvo->posicao.y);
+    if (dist <= tiro->raio + alvo->raio) {
+        alvo->ativo = FALSE;
+        tiro->ativo = FALSE;
+        alvo->posicao.x = 200;
+        alvo->posicao.y = 200;
     }
 }
 
@@ -51,7 +57,7 @@ void movimentaTiroInimigo()
         tiroInimigo.ativo = FALSE;
 
     tiroInimigo.posicao.y -= tiroInimigo.velocidade;
-    // detectaTiro(&tiroInimigo);
+    detectaTiro(&tiroInimigo);
     glutPostRedisplay();
     glutTimerFunc(33, movimentaTiroInimigo, 33);
 }
