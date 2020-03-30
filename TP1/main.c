@@ -36,11 +36,10 @@ void detectaTiro(tipoSprite* tiro)
 {
     tipoSprite* alvo;
 
-    if (tiro == &tiroJogador) {
+    if (tiro == &tiroJogador)
         alvo = &inimigo;
-    } else if (tiro == &tiroInimigo) {
+    else if (tiro == &tiroInimigo)
         alvo = &jogador;
-    }
 
     float dist = formulaDistancia(tiro->posicao.x, alvo->posicao.x, tiro->posicao.y, alvo->posicao.y);
     if (dist <= tiro->raio + alvo->raio) {
