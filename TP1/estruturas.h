@@ -7,18 +7,8 @@ typedef struct spriteStruct
 {
     tipoVetor2d posicao;
     tipoVetor2d dimensoes;
-    int textura;
-} tipoSprite;
-
-typedef struct naveStruct
-{
-    tipoSprite sprite;
-    float velocidade;
-} tipoNave;
-
-typedef struct tiroStruct
-{
-    tipoSprite sprite;
+    float raio;
     float velocidade;
     int ativo;
-} tipoTiro;
+    int textura;
+} tipoSprite;

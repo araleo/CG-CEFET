@@ -16,15 +16,15 @@ float formulaDistancia(float x1, float x2, float y1, float y2);
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
 
-tipoNave jogador;
-tipoNave inimigo;
-tipoTiro tiro;
+tipoSprite jogador;
+tipoSprite inimigo;
+tipoSprite tiro;
 
 void detectaTiro()
 {
     if (tiro.ativo) {
-        float dist = formulaDistancia(tiro.sprite.posicao.x, inimigo.sprite.posicao.x, tiro.sprite.posicao.y, inimigo.sprite.posicao.y);
-        if (dist <= 10) {
+        float dist = formulaDistancia(tiro.posicao.x, inimigo.posicao.x, tiro.posicao.y, inimigo.posicao.y);
+        if (dist <= tiro.raio + inimigo.raio) {
             printf("acertou\n");
         }
     }
@@ -32,10 +32,10 @@ void detectaTiro()
 
 void movimentaTiro()
 {
-    if (tiro.sprite.posicao.y > ALTURA_DO_MUNDO/2)
+    if (tiro.posicao.y > ALTURA_DO_MUNDO/2)
         tiro.ativo = FALSE;
 
-    tiro.sprite.posicao.y += tiro.velocidade;
+    tiro.posicao.y += tiro.velocidade;
     detectaTiro();
     glutPostRedisplay();
     glutTimerFunc(33, movimentaTiro, 33);
@@ -43,16 +43,16 @@ void movimentaTiro()
 
 void movimentaInimigos()
 {
-    if (inimigo.sprite.posicao.y <= jogador.sprite.posicao.y + jogador.sprite.dimensoes.y) {
+    if (inimigo.posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
         // jogador perdeu
         // TODO
-    } else if (inimigo.sprite.posicao.x < LARGURA_DO_MUNDO/2 - inimigo.sprite.dimensoes.x/2) {
+    } else if (inimigo.posicao.x < LARGURA_DO_MUNDO/2 - inimigo.dimensoes.x/2) {
         // move horizontalmente
-        inimigo.sprite.posicao.x += inimigo.velocidade;
+        inimigo.posicao.x += inimigo.velocidade;
     } else {
         // move verticalmente e volta para a esquerda da tela
-        inimigo.sprite.posicao.x = -LARGURA_DO_MUNDO/2 + inimigo.sprite.dimensoes.x/2;
-        inimigo.sprite.posicao.y -= inimigo.sprite.dimensoes.y;
+        inimigo.posicao.x = -LARGURA_DO_MUNDO/2 + inimigo.dimensoes.x/2;
+        inimigo.posicao.y -= inimigo.dimensoes.y;
     }
     glutPostRedisplay();
     glutTimerFunc(33, movimentaInimigos, 33);
@@ -110,9 +110,9 @@ void desenharMinhaCena()
 
     // desenhos
     desenhaFundoJogo();
-    desenhaSprite(jogador.sprite, 0.000, 0.007, 0.109, 0.073);
-    desenhaSprite(inimigo.sprite, 0.413, 0.207, 0.090, 0.082);
-    desenhaSprite(tiro.sprite, 0.834, 0.339, 0.008, 0.036);
+    desenhaSprite(jogador, 0.000, 0.007, 0.109, 0.073);
+    desenhaSprite(inimigo, 0.413, 0.207, 0.090, 0.082);
+    desenhaSprite(tiro, 0.834, 0.339, 0.008, 0.036);
     // desenhaBlocos(); //BRUNA
 
     // movimentos
@@ -137,31 +137,32 @@ GLuint carregaTextura(const char* arquivo)
     return idTextura;
 }
 
-void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, float altura)
+void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, float altura, float raio)
 {
     sprite->posicao.x = x;
     sprite->posicao.y = y;
     sprite->dimensoes.x = comprimento;
     sprite->dimensoes.y = altura;
+    sprite->raio = raio;
+    sprite->ativo = TRUE;
 }
 
 void inicializaTiro(float x, float y)
 {
-    inicializaSprite(&tiro.sprite, x, y, 1, 5);
+    inicializaSprite(&tiro, x, y, 1, 5, 1);
     tiro.velocidade = 2;
-    tiro.ativo = TRUE;
 }
 
 void inicializaInimigo()
 {
-    inicializaSprite(&inimigo.sprite, 0, ALTURA_DO_MUNDO * 0.4, 15, 15);
+    inicializaSprite(&inimigo, 0, ALTURA_DO_MUNDO * 0.4, 15, 15, 15/2);
     // inimigo.velocidade = 0.0005;
     inimigo.velocidade = 0.001;
 }
 
 void inicializaJogador()
 {
-    inicializaSprite(&jogador.sprite, 0, -ALTURA_DO_MUNDO * 0.4, 20, 20);
+    inicializaSprite(&jogador, 0, -ALTURA_DO_MUNDO * 0.4, 20, 20, 20/2);
     jogador.velocidade = 2;
 }
 
@@ -184,21 +185,21 @@ void teclaPressionada(unsigned char key, int x, int y)
             exit(0);
             break;
         case 'a':
-            if (jogador.sprite.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.sprite.dimensoes.x/2) {
-                jogador.sprite.posicao.x -= jogador.velocidade;
+            if (jogador.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.dimensoes.x/2) {
+                jogador.posicao.x -= jogador.velocidade;
                 glutPostRedisplay();
             }
             break;
         case 'd':
-            if (jogador.sprite.posicao.x < LARGURA_DO_MUNDO/2 - jogador.sprite.dimensoes.x/2) {
-                jogador.sprite.posicao.x += jogador.velocidade;
+            if (jogador.posicao.x < LARGURA_DO_MUNDO/2 - jogador.dimensoes.x/2) {
+                jogador.posicao.x += jogador.velocidade;
                 glutPostRedisplay();
             }
             break;
         case ' ':
             if (!tiro.ativo) {
-                inicializaTiro(jogador.sprite.posicao.x, jogador.sprite.posicao.y + jogador.sprite.dimensoes.y/2);
-                desenhaSprite(tiro.sprite, 0.833, 0.339, 0.008, 0.036);
+                inicializaTiro(jogador.posicao.x, jogador.posicao.y + jogador.dimensoes.y/2);
+                desenhaSprite(tiro, 0.833, 0.339, 0.008, 0.036);
                 glutPostRedisplay();
             }
             break;
