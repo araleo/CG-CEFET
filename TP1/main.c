@@ -1,7 +1,10 @@
 #include <SOIL/SOIL.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "estruturas.h"
 
@@ -18,27 +21,36 @@ GLuint idTexturaSheet;
 
 tipoSprite jogador;
 tipoSprite inimigo;
-tipoSprite tiro;
+tipoSprite tiroJogador;
+tipoSprite tiroInimigo;
 
-void detectaTiro()
+void inimigoAtira()
 {
-    if (tiro.ativo) {
-        float dist = formulaDistancia(tiro.posicao.x, inimigo.posicao.x, tiro.posicao.y, inimigo.posicao.y);
-        if (dist <= tiro.raio + inimigo.raio) {
-            printf("acertou\n");
+
+}
+
+void detectaTiro(tipoSprite* tiro)
+{
+    if (tiro->ativo) {
+        float dist = formulaDistancia(tiro->posicao.x, inimigo.posicao.x, tiro->posicao.y, inimigo.posicao.y);
+        if (dist <= tiro->raio + inimigo.raio) {
+            inimigo.ativo = FALSE;
+            tiro->ativo = FALSE;
+            inimigo.posicao.x = 200;
+            inimigo.posicao.y = 200;
         }
     }
 }
 
-void movimentaTiro()
+void movimentaTiroJogador()
 {
-    if (tiro.posicao.y > ALTURA_DO_MUNDO/2)
-        tiro.ativo = FALSE;
+    if (tiroJogador.posicao.y > ALTURA_DO_MUNDO/2)
+        tiroJogador.ativo = FALSE;
 
-    tiro.posicao.y += tiro.velocidade;
-    detectaTiro();
+    tiroJogador.posicao.y += tiroJogador.velocidade;
+    detectaTiro(&tiroJogador);
     glutPostRedisplay();
-    glutTimerFunc(33, movimentaTiro, 33);
+    glutTimerFunc(33, movimentaTiroJogador, 33);
 }
 
 void movimentaInimigos()
@@ -46,10 +58,15 @@ void movimentaInimigos()
     if (inimigo.posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
         // jogador perdeu
         // TODO
-    } else if (inimigo.posicao.x < LARGURA_DO_MUNDO/2 - inimigo.dimensoes.x/2) {
+        printf("perdeu\n");
+    } else if (inimigo.ativo && inimigo.posicao.x < LARGURA_DO_MUNDO/2 - inimigo.dimensoes.x/2) {
         // move horizontalmente
         inimigo.posicao.x += inimigo.velocidade;
-    } else {
+
+        if (rand() % 99 == 0)
+            inimigoAtira();
+
+    } else if (inimigo.ativo) {
         // move verticalmente e volta para a esquerda da tela
         inimigo.posicao.x = -LARGURA_DO_MUNDO/2 + inimigo.dimensoes.x/2;
         inimigo.posicao.y -= inimigo.dimensoes.y;
@@ -111,8 +128,13 @@ void desenharMinhaCena()
     // desenhos
     desenhaFundoJogo();
     desenhaSprite(jogador, 0.000, 0.007, 0.109, 0.073);
-    desenhaSprite(inimigo, 0.413, 0.207, 0.090, 0.082);
-    desenhaSprite(tiro, 0.834, 0.339, 0.008, 0.036);
+
+    if (tiroJogador.ativo)
+        desenhaSprite(tiroJogador, 0.834, 0.339, 0.008, 0.036);
+
+    if (inimigo.ativo)
+        desenhaSprite(inimigo, 0.413, 0.207, 0.090, 0.082);
+
     // desenhaBlocos(); //BRUNA
 
     // movimentos
@@ -147,16 +169,15 @@ void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, f
     sprite->ativo = TRUE;
 }
 
-void inicializaTiro(float x, float y)
+void inicializaTiro(tipoSprite* tiro, float x, float y)
 {
-    inicializaSprite(&tiro, x, y, 1, 5, 1);
-    tiro.velocidade = 2;
+    inicializaSprite(&tiroJogador, x, y, 1, 5, 1);
+    tiro->velocidade = 2;
 }
 
 void inicializaInimigo()
 {
     inicializaSprite(&inimigo, 0, ALTURA_DO_MUNDO * 0.4, 15, 15, 15/2);
-    // inimigo.velocidade = 0.0005;
     inimigo.velocidade = 0.001;
 }
 
@@ -197,9 +218,9 @@ void teclaPressionada(unsigned char key, int x, int y)
             }
             break;
         case ' ':
-            if (!tiro.ativo) {
-                inicializaTiro(jogador.posicao.x, jogador.posicao.y + jogador.dimensoes.y/2);
-                desenhaSprite(tiro, 0.833, 0.339, 0.008, 0.036);
+            if (!tiroJogador.ativo) {
+                inicializaTiro(&tiroJogador, jogador.posicao.x, jogador.posicao.y + jogador.dimensoes.y/2);
+                desenhaSprite(tiroJogador, 0.833, 0.339, 0.008, 0.036);
                 glutPostRedisplay();
             }
             break;
@@ -223,6 +244,9 @@ void inicializa()
 
 int main(int argc, char** argv)
 {
+    // inicializa gerador de números aleatórios
+    srand(time(0));
+
     // inicialização do glut
     glutInit(&argc, argv);
     glutInitContextVersion(1, 1);
@@ -237,7 +261,7 @@ int main(int argc, char** argv)
     glutReshapeFunc(redimensiona);
     glutKeyboardFunc(teclaPressionada);
     glutTimerFunc(0, movimentaInimigos, 33);
-    glutTimerFunc(0, movimentaTiro, 33);
+    glutTimerFunc(0, movimentaTiroJogador, 33);
 
     // configura variaveis de estado
     inicializa();
