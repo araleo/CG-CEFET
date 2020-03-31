@@ -14,20 +14,23 @@
 #define ALTURA_DO_MUNDO 200
 #define LARGURA_DO_MUNDO 200
 
+#define QTD_INIMIGOS 5
+
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
 
 tipoSprite jogador;
-tipoSprite inimigo;
 tipoSprite tiroJogador;
 tipoSprite tiroInimigo;
+
+tipoSprite vetorInimigos[QTD_INIMIGOS];
 
 void inimigoAtira()
 {
     int sorteiaTiro = rand() % 32000;
+    int sorteiaInimigo = rand() % QTD_INIMIGOS;
     if (sorteiaTiro == 0 && !tiroInimigo.ativo) {
-        inicializaTiro(&tiroInimigo, inimigo.posicao.x, inimigo.posicao.y);
-        desenhaSprite(tiroInimigo, 0.833, 0.339, 0.008, 0.036);
+        inicializaTiro(&tiroInimigo, vetorInimigos[sorteiaInimigo].posicao.x, vetorInimigos[sorteiaInimigo].posicao.y);
         glutPostRedisplay();
     }
 }
@@ -36,17 +39,19 @@ void detectaTiro(tipoSprite* tiro)
 {
     tipoSprite* alvo;
 
-    if (tiro == &tiroJogador)
-        alvo = &inimigo;
-    else if (tiro == &tiroInimigo)
-        alvo = &jogador;
+    for (int i = 0; i < QTD_INIMIGOS; i++) {
+        if (tiro == &tiroJogador)
+            alvo = &vetorInimigos[i];
+        else if (tiro == &tiroInimigo)
+            alvo = &jogador;
 
-    float dist = formulaDistancia(tiro->posicao.x, alvo->posicao.x, tiro->posicao.y, alvo->posicao.y);
-    if (dist <= tiro->raio + alvo->raio) {
-        alvo->ativo = FALSE;
-        tiro->ativo = FALSE;
-        alvo->posicao.x = 200;
-        alvo->posicao.y = 200;
+        float dist = formulaDistancia(tiro->posicao.x, alvo->posicao.x, tiro->posicao.y, alvo->posicao.y);
+        if (dist <= tiro->raio + alvo->raio) {
+            alvo->ativo = FALSE;
+            tiro->ativo = FALSE;
+            alvo->posicao.x = 200;
+            alvo->posicao.y = 200;
+        }
     }
 }
 
@@ -74,17 +79,19 @@ void movimentaTiroJogador()
 
 void movimentaInimigos()
 {
-    if (inimigo.posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
-        // jogador perdeu
-        // TODO
-    } else if (inimigo.ativo && inimigo.posicao.x < LARGURA_DO_MUNDO/2 - inimigo.dimensoes.x/2) {
-        // move horizontalmente
-        inimigo.posicao.x += inimigo.velocidade;
-        inimigoAtira();
-    } else if (inimigo.ativo) {
-        // move verticalmente e volta para a esquerda da tela
-        inimigo.posicao.x = -LARGURA_DO_MUNDO/2 + inimigo.dimensoes.x/2;
-        inimigo.posicao.y -= inimigo.dimensoes.y;
+    for (int i = 0; i < QTD_INIMIGOS; i++) {
+        if (vetorInimigos[i].posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
+            // jogador perdeu
+            // TODO
+        } else if (vetorInimigos[i].ativo && vetorInimigos[i].posicao.x < LARGURA_DO_MUNDO/2 - vetorInimigos[i].dimensoes.x/2) {
+            // move horizontalmente
+            vetorInimigos[i].posicao.x += vetorInimigos[i].velocidade;
+            inimigoAtira();
+        } else if (vetorInimigos[i].ativo) {
+            // move verticalmente e volta para a esquerda da tela
+            vetorInimigos[i].posicao.x = -LARGURA_DO_MUNDO/2 + vetorInimigos[i].dimensoes.x/2;
+            vetorInimigos[i].posicao.y -= vetorInimigos[i].dimensoes.y;
+        }
     }
     glutPostRedisplay();
     glutTimerFunc(33, movimentaInimigos, 33);
@@ -148,18 +155,17 @@ void desenharMinhaCena()
         desenhaSprite(tiroJogador, 0.834, 0.339, 0.008, 0.036);
 
     if (tiroInimigo.ativo)
-        desenhaSprite(tiroInimigo, 0.834, 0.339, 0.008, 0.036);
+        desenhaSprite(tiroInimigo, 0.835, 0.151, 0.008, 0.055);
 
-    if (inimigo.ativo)
-        desenhaSprite(inimigo, 0.413, 0.207, 0.090, 0.082);
-
-    // desenhaBlocos(); //BRUNA
+    for (int i = 0; i < 5; i++)
+        if (vetorInimigos[i].ativo)
+            desenhaSprite(vetorInimigos[i], 0.413, 0.207, 0.090, 0.082);
 
     // movimentos
-    movimentaInimigos(inimigo);
+    movimentaInimigos();
+
 
     glDisable(GL_TEXTURE_2D);
-
     glutSwapBuffers();
 }
 
@@ -195,8 +201,12 @@ void inicializaTiro(tipoSprite* tiro, float x, float y)
 
 void inicializaInimigo()
 {
-    inicializaSprite(&inimigo, 0, ALTURA_DO_MUNDO * 0.4, 15, 15, 15/2);
-    inimigo.velocidade = 0.001;
+    int pos = -80;
+    for (int i = 0; i < QTD_INIMIGOS; i++) {
+        inicializaSprite(&vetorInimigos[i], pos, ALTURA_DO_MUNDO * 0.4, 15, 15, 15/2);
+        vetorInimigos[i].velocidade = 0.001;
+        pos += 20;
+    }
 }
 
 void inicializaJogador()
