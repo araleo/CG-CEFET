@@ -81,18 +81,27 @@ void movimentaTiroJogador()
 void movimentaInimigos()
 {
     for (int i = 0; i < QTD_INIMIGOS; i++) {
-        if (vetorInimigos[i].posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
-            // jogador perdeu
-            // TODO
-        } else if (vetorInimigos[i].ativo && vetorInimigos[i].posicao.x < LARGURA_DO_MUNDO/2 - vetorInimigos[i].dimensoes.x/2) {
-            // move horizontalmente
-            vetorInimigos[i].posicao.x += vetorInimigos[i].velocidade;
-            inimigoAtira();
-        } else if (vetorInimigos[i].ativo) {
-            // move verticalmente e volta para a esquerda da tela
-            vetorInimigos[i].posicao.x = -LARGURA_DO_MUNDO/2 + vetorInimigos[i].dimensoes.x/2;
-            vetorInimigos[i].posicao.y -= vetorInimigos[i].dimensoes.y;
+
+        if (vetorInimigos[i].ativo) {
+            if (vetorInimigos[i].posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
+                // jogador perdeu
+                // TODO
+            } else if (vetorInimigos[i].posicao.x <= -LARGURA_DO_MUNDO/2 + vetorInimigos[i].dimensoes.x/2
+                        || vetorInimigos[i].posicao.x >= LARGURA_DO_MUNDO/2 - vetorInimigos[i].dimensoes.x/2) {
+                // move verticalmente e altera a direção
+                for (int j = 0; j < QTD_INIMIGOS; j++) {
+                    vetorInimigos[j].posicao.y -= 20;
+                    vetorInimigos[j].velocidade *= -1;
+                    vetorInimigos[j].posicao.x += vetorInimigos[j].velocidade;
+                }
+            } else {
+                // move horizontalmente
+                vetorInimigos[i].posicao.x += vetorInimigos[i].velocidade;
+                inimigoAtira();
+            }
         }
+
+
     }
     glutPostRedisplay();
     glutTimerFunc(33, movimentaInimigos, 33);
