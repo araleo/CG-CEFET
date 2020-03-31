@@ -73,7 +73,7 @@ void movimentaTiroJogador()
 
     if (tiroJogador.ativo)
         detectaTiro(&tiroJogador);
-        
+
     glutPostRedisplay();
     glutTimerFunc(33, movimentaTiroJogador, 33);
 }
