@@ -10,11 +10,10 @@
 
 #define TRUE 1
 #define FALSE 0
-
 #define ALTURA_DO_MUNDO 200
 #define LARGURA_DO_MUNDO 200
-
-#define QTD_INIMIGOS 5
+#define QTD_INIMIGOS 10
+#define MAX_INIMIGOS_LINHA 5
 
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
@@ -22,7 +21,6 @@ GLuint idTexturaSheet;
 tipoSprite jogador;
 tipoSprite tiroJogador;
 tipoSprite tiroInimigo;
-
 tipoSprite vetorInimigos[QTD_INIMIGOS];
 
 void inimigoAtira()
@@ -72,7 +70,10 @@ void movimentaTiroJogador()
         tiroJogador.ativo = FALSE;
 
     tiroJogador.posicao.y += tiroJogador.velocidade;
-    detectaTiro(&tiroJogador);
+
+    if (tiroJogador.ativo)
+        detectaTiro(&tiroJogador);
+        
     glutPostRedisplay();
     glutTimerFunc(33, movimentaTiroJogador, 33);
 }
@@ -157,7 +158,7 @@ void desenharMinhaCena()
     if (tiroInimigo.ativo)
         desenhaSprite(tiroInimigo, 0.835, 0.151, 0.008, 0.055);
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < QTD_INIMIGOS; i++)
         if (vetorInimigos[i].ativo)
             desenhaSprite(vetorInimigos[i], 0.413, 0.207, 0.090, 0.082);
 
@@ -201,11 +202,16 @@ void inicializaTiro(tipoSprite* tiro, float x, float y)
 
 void inicializaInimigo()
 {
-    int pos = -80;
+    int x = -80;
+    int y = ALTURA_DO_MUNDO * 0.4;
     for (int i = 0; i < QTD_INIMIGOS; i++) {
-        inicializaSprite(&vetorInimigos[i], pos, ALTURA_DO_MUNDO * 0.4, 15, 15, 15/2);
+        inicializaSprite(&vetorInimigos[i], x, y, 15, 15, 15/2);
         vetorInimigos[i].velocidade = 0.001;
-        pos += 20;
+        x += 20;
+        if ((i+1) % MAX_INIMIGOS_LINHA == 0){
+            y -= 30;
+            x = -80;
+        }
     }
 }
 
