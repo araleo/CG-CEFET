@@ -1,10 +1,3 @@
-# main: main.c
-# 	gcc main.c -o main -lGL -lGLU -lglut -lSOIL
-#
-# run: main
-# 	./main
-
-
 main.o : main.c
 	gcc -c main.c
 	gcc -c funcoes.c

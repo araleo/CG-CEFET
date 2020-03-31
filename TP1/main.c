@@ -36,6 +36,7 @@ void inimigoAtira()
 void detectaTiro(tipoSprite* tiro)
 {
     tipoSprite* alvo;
+    float dist;
 
     for (int i = 0; i < QTD_INIMIGOS; i++) {
         if (tiro == &tiroJogador)
@@ -43,7 +44,7 @@ void detectaTiro(tipoSprite* tiro)
         else if (tiro == &tiroInimigo)
             alvo = &jogador;
 
-        float dist = formulaDistancia(tiro->posicao.x, alvo->posicao.x, tiro->posicao.y, alvo->posicao.y);
+        dist = formulaDistancia(tiro->posicao.x, alvo->posicao.x, tiro->posicao.y, alvo->posicao.y);
         if (dist <= tiro->raio + alvo->raio) {
             alvo->ativo = FALSE;
             tiro->ativo = FALSE;
@@ -81,7 +82,6 @@ void movimentaTiroJogador()
 void movimentaInimigos()
 {
     for (int i = 0; i < QTD_INIMIGOS; i++) {
-
         if (vetorInimigos[i].ativo) {
             if (vetorInimigos[i].posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
                 // jogador perdeu
@@ -100,8 +100,6 @@ void movimentaInimigos()
                 inimigoAtira();
             }
         }
-
-
     }
     glutPostRedisplay();
     glutTimerFunc(33, movimentaInimigos, 33);
