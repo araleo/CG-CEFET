@@ -256,6 +256,18 @@ void teclaPressionada(unsigned char key, int x, int y)
     }
 }
 
+void teclasEspeciais(int key, int x, int y)
+{
+    switch(key) {
+        case GLUT_KEY_LEFT:
+            movimentaJogador('e');
+            break;
+        case GLUT_KEY_RIGHT:
+            movimentaJogador('d');
+            break;
+    }
+}
+
 void inicializaJogo()
 {
     JOGO = ativo;
@@ -296,6 +308,7 @@ int main(int argc, char** argv)
     glutDisplayFunc(desenharMinhaCena);
     glutReshapeFunc(redimensiona);
     glutKeyboardFunc(teclaPressionada);
+    glutSpecialFunc(teclasEspeciais);
     glutTimerFunc(0, movimentaInimigos, 33);
     glutTimerFunc(0, movimentaTiros, 33);
 
