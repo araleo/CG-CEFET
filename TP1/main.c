@@ -3,6 +3,7 @@
 #include <GL/freeglut.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include "estruturas.h"
@@ -178,6 +179,8 @@ void desenharMinhaCena()
 
     if (JOGO == ativo) {
         movimentaInimigos();
+    } else if (JOGO == pause) {
+        escreveTexto(GLUT_BITMAP_HELVETICA_18, "JOGO PAUSADO", -20, 0, 1);
     }
 
     glDisable(GL_TEXTURE_2D);
@@ -245,6 +248,14 @@ void redimensiona(int w, int h)
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+}
+
+void escreveTexto(void* fonte, char* texto, float x, float y, float z)
+{
+    glRasterPos3f(x, y, z);
+    for (int i = 0; i < strlen(texto); i++) {
+        glutBitmapCharacter(fonte, texto[i]);
+    }
 }
 
 void teclaPressionada(unsigned char key, int x, int y)
