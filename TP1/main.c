@@ -55,7 +55,9 @@ void movimentaTiroInimigo()
     if (tiroInimigo.posicao.y < -ALTURA_DO_MUNDO/2)
         tiroInimigo.ativo = FALSE;
 
-    tiroInimigo.posicao.y -= tiroInimigo.velocidade;
+    if (JOGO == ativo)
+        tiroInimigo.posicao.y -= tiroInimigo.velocidade;
+
     detectaTiro(&tiroInimigo);
     glutPostRedisplay();
     glutTimerFunc(33, movimentaTiroInimigo, 33);
@@ -66,7 +68,9 @@ void movimentaTiroJogador()
     if (tiroJogador.posicao.y > ALTURA_DO_MUNDO/2)
         tiroJogador.ativo = FALSE;
 
-    tiroJogador.posicao.y += tiroJogador.velocidade;
+
+    if (JOGO == ativo)
+        tiroJogador.posicao.y += tiroJogador.velocidade;
 
     if (tiroJogador.ativo)
         detectaTiro(&tiroJogador);
@@ -77,23 +81,25 @@ void movimentaTiroJogador()
 
 void movimentaInimigos()
 {
-    for (int i = 0; i < QTD_INIMIGOS; i++) {
-        if (vetorInimigos[i].ativo) {
-            if (vetorInimigos[i].posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
-                // jogador perdeu
-                // TODO
-            } else if (vetorInimigos[i].posicao.x <= -LARGURA_DO_MUNDO/2 + vetorInimigos[i].dimensoes.x/2 ||
-                        vetorInimigos[i].posicao.x >= LARGURA_DO_MUNDO/2 - vetorInimigos[i].dimensoes.x/2) {
-                // move verticalmente e altera a direção
-                for (int j = 0; j < QTD_INIMIGOS; j++) {
-                    vetorInimigos[j].posicao.y -= 20;
-                    vetorInimigos[j].velocidade *= -1;
-                    vetorInimigos[j].posicao.x += vetorInimigos[j].velocidade;
+    if (JOGO == ativo) {
+        for (int i = 0; i < QTD_INIMIGOS; i++) {
+            if (vetorInimigos[i].ativo) {
+                if (vetorInimigos[i].posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
+                    // jogador perdeu
+                    // TODO
+                } else if (vetorInimigos[i].posicao.x <= -LARGURA_DO_MUNDO/2 + vetorInimigos[i].dimensoes.x/2 ||
+                            vetorInimigos[i].posicao.x >= LARGURA_DO_MUNDO/2 - vetorInimigos[i].dimensoes.x/2) {
+                    // move verticalmente e altera a direção
+                    for (int j = 0; j < QTD_INIMIGOS; j++) {
+                        vetorInimigos[j].posicao.y -= 20;
+                        vetorInimigos[j].velocidade *= -1;
+                        vetorInimigos[j].posicao.x += vetorInimigos[j].velocidade;
+                    }
+                } else {
+                    // move horizontalmente
+                    vetorInimigos[i].posicao.x += vetorInimigos[i].velocidade;
+                    inimigoAtira();
                 }
-            } else {
-                // move horizontalmente
-                vetorInimigos[i].posicao.x += vetorInimigos[i].velocidade;
-                inimigoAtira();
             }
         }
     }
@@ -156,9 +162,6 @@ void desenhaFase()
     for (int i = 0; i < QTD_INIMIGOS; i++)
         if (vetorInimigos[i].ativo)
             desenhaSprite(vetorInimigos[i], 0.413, 0.207, 0.090, 0.082);
-
-    // movimentos
-    movimentaInimigos();
 }
 
 void desenharMinhaCena()
@@ -171,9 +174,10 @@ void desenharMinhaCena()
 
     // desenhos
     desenhaFundoJogo();
+    desenhaFase();
 
     if (JOGO == ativo) {
-        desenhaFase();
+        movimentaInimigos();
     }
 
     glDisable(GL_TEXTURE_2D);
@@ -251,20 +255,20 @@ void teclaPressionada(unsigned char key, int x, int y)
             break;
         case 'A':
         case 'a':
-            if (jogador.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.dimensoes.x/2) {
+            if (JOGO == ativo && jogador.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.dimensoes.x/2) {
                 jogador.posicao.x -= jogador.velocidade;
                 glutPostRedisplay();
             }
             break;
         case 'D':
         case 'd':
-            if (jogador.posicao.x < LARGURA_DO_MUNDO/2 - jogador.dimensoes.x/2) {
+            if (JOGO == ativo && jogador.posicao.x < LARGURA_DO_MUNDO/2 - jogador.dimensoes.x/2) {
                 jogador.posicao.x += jogador.velocidade;
                 glutPostRedisplay();
             }
             break;
         case ' ':
-            if (!tiroJogador.ativo) {
+            if (JOGO == ativo && !tiroJogador.ativo) {
                 inicializaTiro(&tiroJogador, jogador.posicao.x, jogador.posicao.y + jogador.dimensoes.y/2);
                 desenhaSprite(tiroJogador, 0.833, 0.339, 0.008, 0.036);
                 glutPostRedisplay();
@@ -273,7 +277,11 @@ void teclaPressionada(unsigned char key, int x, int y)
         case 'P':
         case 'p':
             // pausa o Jogo
-            // TODO
+            if (JOGO == ativo) {
+                JOGO = pause;
+            } else if (JOGO == pause) {
+                JOGO = ativo;
+            }
             break;
             break;
         case 'R':
