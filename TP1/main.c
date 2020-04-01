@@ -9,7 +9,7 @@
 #include "declaracoes.h"
 #include "definicoes.h"
 
-enum estados_jogo {gameOver, ativo, pause} JOGO;
+enum estadosJogo {gameOver, ativo, pause} JOGO;
 
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
@@ -47,7 +47,7 @@ void detectaTiro(tipoSprite* tiro)
             alvo = &jogador;
 
         dist = formulaDistancia(tiro->posicao.x, alvo->posicao.x, tiro->posicao.y, alvo->posicao.y);
-        if (alvo->ativo && dist <= tiro->raio + alvo->raio) {
+        if (tiro->ativo && alvo->ativo && dist <= tiro->raio + alvo->raio) {
             alvo->ativo = FALSE;
             tiro->ativo = FALSE;
             verificaGameOver();
@@ -55,34 +55,49 @@ void detectaTiro(tipoSprite* tiro)
     }
 }
 
-void movimentaTiroInimigo()
+void movimentaTiros()
 {
     if (tiroInimigo.posicao.y < -ALTURA_DO_MUNDO/2)
         tiroInimigo.ativo = FALSE;
 
-    if (JOGO == ativo)
+    if (JOGO == ativo && tiroInimigo.ativo) {
         tiroInimigo.posicao.y -= tiroInimigo.velocidade;
-
-    if (tiroInimigo.ativo)
         detectaTiro(&tiroInimigo);
+    }
 
-    glutPostRedisplay();
-    glutTimerFunc(33, movimentaTiroInimigo, 33);
-}
-
-void movimentaTiroJogador()
-{
     if (tiroJogador.posicao.y > ALTURA_DO_MUNDO/2)
         tiroJogador.ativo = FALSE;
 
-    if (JOGO == ativo)
+    if (JOGO == ativo && tiroJogador.ativo) {
         tiroJogador.posicao.y += tiroJogador.velocidade;
-
-    if (tiroJogador.ativo)
         detectaTiro(&tiroJogador);
+    }
 
     glutPostRedisplay();
-    glutTimerFunc(33, movimentaTiroJogador, 33);
+    glutTimerFunc(33, movimentaTiros, 33);
+}
+
+void jogadorAtira()
+{
+    if (JOGO == ativo && !tiroJogador.ativo) {
+        inicializaTiro(&tiroJogador, jogador.posicao.x, jogador.posicao.y + jogador.dimensoes.y/2);
+        desenhaSprite(idTexturaSheet, tiroJogador, 0.833, 0.339, 0.008, 0.036);
+        glutPostRedisplay();
+    }
+}
+
+void movimentaJogador(char lado)
+{
+    if (lado == 'e') {
+        if (JOGO == ativo && jogador.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.dimensoes.x/2) {
+            jogador.posicao.x -= jogador.velocidade;
+        }
+    } else if (lado == 'd') {
+        if (JOGO == ativo && jogador.posicao.x < LARGURA_DO_MUNDO/2 - jogador.dimensoes.x/2) {
+            jogador.posicao.x += jogador.velocidade;
+        }
+    }
+    glutPostRedisplay();
 }
 
 void movimentaInimigos()
@@ -113,61 +128,19 @@ void movimentaInimigos()
     glutTimerFunc(33, movimentaInimigos, 33);
 }
 
-void desenhaSprite(tipoSprite sprite, float sheetX, float sheetY, float comprimento, float altura)
-{
-    glBindTexture(GL_TEXTURE_2D, idTexturaSheet);
-    glPushMatrix();
-        glTranslatef(sprite.posicao.x, sprite.posicao.y, 0);
-        glBegin(GL_TRIANGLE_FAN);
-            // Associamos um canto da textura para cada vértice
-            glTexCoord2f(sheetX, sheetY);
-            glVertex3f(-sprite.dimensoes.x/2, -sprite.dimensoes.y/2, 0);
-
-            glTexCoord2f(sheetX + comprimento, sheetY);
-            glVertex3f(sprite.dimensoes.x/2, -sprite.dimensoes.y/2, 0);
-
-            glTexCoord2f(sheetX + comprimento, sheetY + altura);
-            glVertex3f(sprite.dimensoes.x/2, sprite.dimensoes.y/2, 0);
-
-            glTexCoord2f(sheetX, sheetY + altura);
-            glVertex3f(-sprite.dimensoes.x/2, sprite.dimensoes.y/2, 0);
-        glEnd();
-    glPopMatrix();
-}
-
-void desenhaFundoJogo()
-{
-    // usa textura
-    glBindTexture(GL_TEXTURE_2D, idTexturaFundo);
-    glBegin(GL_TRIANGLE_FAN);
-        // Associamos um canto da textura para cada vértice
-        glTexCoord2f(0, 0);
-        glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 0);
-
-        glTexCoord2f(1, 0);
-        glVertex3f(LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 0);
-
-        glTexCoord2f(1, 1);
-        glVertex3f(LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, 0);
-
-        glTexCoord2f(0, 1);
-        glVertex3f(-LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, 0);
-    glEnd();
-}
-
 void desenhaFase()
 {
-    desenhaSprite(jogador, 0.000, 0.007, 0.109, 0.073);
+    desenhaSprite(idTexturaSheet, jogador, 0.000, 0.007, 0.109, 0.073);
 
     if (tiroJogador.ativo)
-        desenhaSprite(tiroJogador, 0.834, 0.339, 0.008, 0.036);
+        desenhaSprite(idTexturaSheet, tiroJogador, 0.834, 0.339, 0.008, 0.036);
 
     if (tiroInimigo.ativo)
-        desenhaSprite(tiroInimigo, 0.835, 0.151, 0.008, 0.055);
+        desenhaSprite(idTexturaSheet, tiroInimigo, 0.835, 0.151, 0.008, 0.055);
 
     for (int i = 0; i < QTD_INIMIGOS; i++)
         if (vetorInimigos[i].ativo)
-            desenhaSprite(vetorInimigos[i], 0.413, 0.207, 0.090, 0.082);
+            desenhaSprite(idTexturaSheet, vetorInimigos[i], 0.413, 0.207, 0.090, 0.082);
 }
 
 void desenharMinhaCena()
@@ -179,7 +152,7 @@ void desenharMinhaCena()
     glEnable(GL_TEXTURE_2D);
 
     // desenhos
-    desenhaFundoJogo();
+    desenhaFundoJogo(idTexturaFundo);
     desenhaFase();
 
     if (JOGO == ativo) {
@@ -245,29 +218,6 @@ void redimensiona(int w, int h)
     glLoadIdentity();
 }
 
-void movimentaJogador(char lado)
-{
-    if (lado == 'e') {
-        if (JOGO == ativo && jogador.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.dimensoes.x/2) {
-            jogador.posicao.x -= jogador.velocidade;
-        }
-    } else if (lado == 'd') {
-        if (JOGO == ativo && jogador.posicao.x < LARGURA_DO_MUNDO/2 - jogador.dimensoes.x/2) {
-            jogador.posicao.x += jogador.velocidade;
-        }
-    }
-    glutPostRedisplay();
-}
-
-void jogadorAtira()
-{
-    if (JOGO == ativo && !tiroJogador.ativo) {
-        inicializaTiro(&tiroJogador, jogador.posicao.x, jogador.posicao.y + jogador.dimensoes.y/2);
-        desenhaSprite(tiroJogador, 0.833, 0.339, 0.008, 0.036);
-        glutPostRedisplay();
-    }
-}
-
 void pausa()
 {
     if (JOGO == ativo)
@@ -299,12 +249,20 @@ void teclaPressionada(unsigned char key, int x, int y)
             break;
         case 'R':
         case 'r':
-            // reinicia o Jogo
-            // TODO
+            inicializaJogo();
             break;
         default:
             break;
     }
+}
+
+void inicializaJogo()
+{
+    JOGO = ativo;
+    tiroInimigo.ativo = FALSE;
+    tiroJogador.ativo = FALSE;
+    inicializaJogador();
+    inicializaInimigo();
 }
 
 void inicializa()
@@ -318,9 +276,6 @@ void inicializa()
     // carrega texturas
     idTexturaFundo = carregaTextura("imagens/fundo.png");
     idTexturaSheet = carregaTextura("imagens/sheet.png");
-
-    // define estado do jogo
-    JOGO = ativo;
 }
 
 int main(int argc, char** argv)
@@ -342,15 +297,13 @@ int main(int argc, char** argv)
     glutReshapeFunc(redimensiona);
     glutKeyboardFunc(teclaPressionada);
     glutTimerFunc(0, movimentaInimigos, 33);
-    glutTimerFunc(0, movimentaTiroJogador, 33);
-    glutTimerFunc(0, movimentaTiroInimigo, 33);
+    glutTimerFunc(0, movimentaTiros, 33);
 
     // configura variaveis de estado
     inicializa();
 
     // inicializa variaveis do jogo
-    inicializaJogador();
-    inicializaInimigo();
+    inicializaJogo();
 
     // main loop
     glutMainLoop();

@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "definicoes.h"
+#include "estruturas.h"
+
 #define min(x,y) ((x) < (y) ? (x) : (y))
 #define max(x,y) ((x) > (y) ? (x) : (y))
 
@@ -35,4 +38,46 @@ GLuint carregaTextura(const char* arquivo)
         printf("Erro do SOIL: '%s'\n", SOIL_last_result());
 
     return idTextura;
+}
+
+void desenhaFundoJogo(GLuint textura)
+{
+    // usa textura
+    glBindTexture(GL_TEXTURE_2D, textura);
+    glBegin(GL_TRIANGLE_FAN);
+        // Associamos um canto da textura para cada vértice
+        glTexCoord2f(0, 0);
+        glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 0);
+
+        glTexCoord2f(1, 0);
+        glVertex3f(LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 0);
+
+        glTexCoord2f(1, 1);
+        glVertex3f(LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, 0);
+
+        glTexCoord2f(0, 1);
+        glVertex3f(-LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, 0);
+    glEnd();
+}
+
+void desenhaSprite(GLuint textura, tipoSprite sprite, float sheetX, float sheetY, float comprimento, float altura)
+{
+    glBindTexture(GL_TEXTURE_2D, textura);
+    glPushMatrix();
+        glTranslatef(sprite.posicao.x, sprite.posicao.y, 0);
+        glBegin(GL_TRIANGLE_FAN);
+            // Associamos um canto da textura para cada vértice
+            glTexCoord2f(sheetX, sheetY);
+            glVertex3f(-sprite.dimensoes.x/2, -sprite.dimensoes.y/2, 0);
+
+            glTexCoord2f(sheetX + comprimento, sheetY);
+            glVertex3f(sprite.dimensoes.x/2, -sprite.dimensoes.y/2, 0);
+
+            glTexCoord2f(sheetX + comprimento, sheetY + altura);
+            glVertex3f(sprite.dimensoes.x/2, sprite.dimensoes.y/2, 0);
+
+            glTexCoord2f(sheetX, sheetY + altura);
+            glVertex3f(-sprite.dimensoes.x/2, sprite.dimensoes.y/2, 0);
+        glEnd();
+    glPopMatrix();
 }
