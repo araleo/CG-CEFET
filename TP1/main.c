@@ -3,7 +3,6 @@
 #include <GL/freeglut.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 #include "estruturas.h"
@@ -19,6 +18,12 @@ tipoSprite jogador;
 tipoSprite tiroJogador;
 tipoSprite tiroInimigo;
 tipoSprite vetorInimigos[QTD_INIMIGOS];
+
+void verificaGameOver()
+{
+    if (!jogador.ativo)
+        JOGO = gameOver;
+}
 
 void inimigoAtira()
 {
@@ -42,11 +47,10 @@ void detectaTiro(tipoSprite* tiro)
             alvo = &jogador;
 
         dist = formulaDistancia(tiro->posicao.x, alvo->posicao.x, tiro->posicao.y, alvo->posicao.y);
-        if (dist <= tiro->raio + alvo->raio) {
+        if (alvo->ativo && dist <= tiro->raio + alvo->raio) {
             alvo->ativo = FALSE;
             tiro->ativo = FALSE;
-            alvo->posicao.x = 200;
-            alvo->posicao.y = 200;
+            verificaGameOver();
         }
     }
 }
@@ -69,7 +73,6 @@ void movimentaTiroJogador()
     if (tiroJogador.posicao.y > ALTURA_DO_MUNDO/2)
         tiroJogador.ativo = FALSE;
 
-
     if (JOGO == ativo)
         tiroJogador.posicao.y += tiroJogador.velocidade;
 
@@ -87,7 +90,7 @@ void movimentaInimigos()
             if (vetorInimigos[i].ativo) {
                 if (vetorInimigos[i].posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
                     // jogador perdeu
-                    // TODO
+                    JOGO = gameOver;
                 } else if (vetorInimigos[i].posicao.x <= -LARGURA_DO_MUNDO/2 + vetorInimigos[i].dimensoes.x/2 ||
                             vetorInimigos[i].posicao.x >= LARGURA_DO_MUNDO/2 - vetorInimigos[i].dimensoes.x/2) {
                     // move verticalmente e altera a direção
@@ -180,25 +183,15 @@ void desenharMinhaCena()
     if (JOGO == ativo) {
         movimentaInimigos();
     } else if (JOGO == pause) {
-        escreveTexto(GLUT_BITMAP_HELVETICA_18, "JOGO PAUSADO", -20, 0, 1);
+        glColor3f(1, 0, 0);
+        escreveTexto(GLUT_BITMAP_HELVETICA_18, "JOGO PAUSADO", -20, 0);
+    } else if (JOGO == gameOver) {
+        glColor3f(1, 0, 0);
+        escreveTexto(GLUT_BITMAP_HELVETICA_18, "GAME OVER", -20, 0);
     }
 
     glDisable(GL_TEXTURE_2D);
     glutSwapBuffers();
-}
-
-GLuint carregaTextura(const char* arquivo)
-{
-    GLuint idTextura = SOIL_load_OGL_texture(
-                        arquivo,
-                        SOIL_LOAD_AUTO,
-                        SOIL_CREATE_NEW_ID,
-                        SOIL_FLAG_INVERT_Y);
-
-    if (!idTextura)
-        printf("Erro do SOIL: '%s'\n", SOIL_last_result());
-
-    return idTextura;
 }
 
 void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, float altura, float raio)
@@ -248,14 +241,6 @@ void redimensiona(int w, int h)
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-}
-
-void escreveTexto(void* fonte, char* texto, float x, float y, float z)
-{
-    glRasterPos3f(x, y, z);
-    for (int i = 0; i < strlen(texto); i++) {
-        glutBitmapCharacter(fonte, texto[i]);
-    }
 }
 
 void teclaPressionada(unsigned char key, int x, int y)
