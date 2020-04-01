@@ -1,0 +1,6 @@
+#define TRUE 1
+#define FALSE 0
+#define ALTURA_DO_MUNDO 200
+#define LARGURA_DO_MUNDO 200
+#define QTD_INIMIGOS 10
+#define MAX_INIMIGOS_LINHA 5

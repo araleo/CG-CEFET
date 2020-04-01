@@ -7,13 +7,9 @@
 
 #include "estruturas.h"
 #include "declaracoes.h"
+#include "definicoes.h"
 
-#define TRUE 1
-#define FALSE 0
-#define ALTURA_DO_MUNDO 200
-#define LARGURA_DO_MUNDO 200
-#define QTD_INIMIGOS 10
-#define MAX_INIMIGOS_LINHA 5
+enum estados_jogo {gameOver, ativo, pause} JOGO;
 
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
@@ -86,8 +82,8 @@ void movimentaInimigos()
             if (vetorInimigos[i].posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
                 // jogador perdeu
                 // TODO
-            } else if (vetorInimigos[i].posicao.x <= -LARGURA_DO_MUNDO/2 + vetorInimigos[i].dimensoes.x/2
-                        || vetorInimigos[i].posicao.x >= LARGURA_DO_MUNDO/2 - vetorInimigos[i].dimensoes.x/2) {
+            } else if (vetorInimigos[i].posicao.x <= -LARGURA_DO_MUNDO/2 + vetorInimigos[i].dimensoes.x/2 ||
+                        vetorInimigos[i].posicao.x >= LARGURA_DO_MUNDO/2 - vetorInimigos[i].dimensoes.x/2) {
                 // move verticalmente e altera a direção
                 for (int j = 0; j < QTD_INIMIGOS; j++) {
                     vetorInimigos[j].posicao.y -= 20;
@@ -147,16 +143,8 @@ void desenhaFundoJogo()
     glEnd();
 }
 
-void desenharMinhaCena()
+void desenhaFase()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
-    glColor3f(1, 1, 1);
-
-    // habilita texturas
-    glEnable(GL_TEXTURE_2D);
-
-    // desenhos
-    desenhaFundoJogo();
     desenhaSprite(jogador, 0.000, 0.007, 0.109, 0.073);
 
     if (tiroJogador.ativo)
@@ -171,7 +159,22 @@ void desenharMinhaCena()
 
     // movimentos
     movimentaInimigos();
+}
 
+void desenharMinhaCena()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1, 1, 1);
+
+    // habilita texturas
+    glEnable(GL_TEXTURE_2D);
+
+    // desenhos
+    desenhaFundoJogo();
+
+    if (JOGO == ativo) {
+        desenhaFase();
+    }
 
     glDisable(GL_TEXTURE_2D);
     glutSwapBuffers();
@@ -209,7 +212,7 @@ void inicializaTiro(tipoSprite* tiro, float x, float y)
 
 void inicializaInimigo()
 {
-    int x = -80;
+    int x = -LARGURA_DO_MUNDO/2 + 20;
     int y = ALTURA_DO_MUNDO * 0.4;
     for (int i = 0; i < QTD_INIMIGOS; i++) {
         inicializaSprite(&vetorInimigos[i], x, y, 15, 15, 15/2);
@@ -246,12 +249,14 @@ void teclaPressionada(unsigned char key, int x, int y)
         case 27:
             exit(0);
             break;
+        case 'A':
         case 'a':
             if (jogador.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.dimensoes.x/2) {
                 jogador.posicao.x -= jogador.velocidade;
                 glutPostRedisplay();
             }
             break;
+        case 'D':
         case 'd':
             if (jogador.posicao.x < LARGURA_DO_MUNDO/2 - jogador.dimensoes.x/2) {
                 jogador.posicao.x += jogador.velocidade;
@@ -264,6 +269,17 @@ void teclaPressionada(unsigned char key, int x, int y)
                 desenhaSprite(tiroJogador, 0.833, 0.339, 0.008, 0.036);
                 glutPostRedisplay();
             }
+            break;
+        case 'P':
+        case 'p':
+            // pausa o Jogo
+            // TODO
+            break;
+            break;
+        case 'R':
+        case 'r':
+            // reinicia o Jogo
+            // TODO
             break;
         default:
             break;
@@ -281,6 +297,9 @@ void inicializa()
     // carrega texturas
     idTexturaFundo = carregaTextura("imagens/fundo.png");
     idTexturaSheet = carregaTextura("imagens/sheet.png");
+
+    // define estado do jogo
+    JOGO = ativo;
 }
 
 int main(int argc, char** argv)
