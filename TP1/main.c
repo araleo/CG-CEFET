@@ -63,7 +63,9 @@ void movimentaTiroInimigo()
     if (JOGO == ativo)
         tiroInimigo.posicao.y -= tiroInimigo.velocidade;
 
-    detectaTiro(&tiroInimigo);
+    if (tiroInimigo.ativo)
+        detectaTiro(&tiroInimigo);
+
     glutPostRedisplay();
     glutTimerFunc(33, movimentaTiroInimigo, 33);
 }
@@ -243,6 +245,37 @@ void redimensiona(int w, int h)
     glLoadIdentity();
 }
 
+void movimentaJogador(char lado)
+{
+    if (lado == 'e') {
+        if (JOGO == ativo && jogador.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.dimensoes.x/2) {
+            jogador.posicao.x -= jogador.velocidade;
+        }
+    } else if (lado == 'd') {
+        if (JOGO == ativo && jogador.posicao.x < LARGURA_DO_MUNDO/2 - jogador.dimensoes.x/2) {
+            jogador.posicao.x += jogador.velocidade;
+        }
+    }
+    glutPostRedisplay();
+}
+
+void jogadorAtira()
+{
+    if (JOGO == ativo && !tiroJogador.ativo) {
+        inicializaTiro(&tiroJogador, jogador.posicao.x, jogador.posicao.y + jogador.dimensoes.y/2);
+        desenhaSprite(tiroJogador, 0.833, 0.339, 0.008, 0.036);
+        glutPostRedisplay();
+    }
+}
+
+void pausa()
+{
+    if (JOGO == ativo)
+        JOGO = pause;
+    else if (JOGO == pause)
+        JOGO = ativo;
+}
+
 void teclaPressionada(unsigned char key, int x, int y)
 {
     switch(key) {
@@ -251,34 +284,18 @@ void teclaPressionada(unsigned char key, int x, int y)
             break;
         case 'A':
         case 'a':
-            if (JOGO == ativo && jogador.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.dimensoes.x/2) {
-                jogador.posicao.x -= jogador.velocidade;
-                glutPostRedisplay();
-            }
+            movimentaJogador('e');
             break;
         case 'D':
         case 'd':
-            if (JOGO == ativo && jogador.posicao.x < LARGURA_DO_MUNDO/2 - jogador.dimensoes.x/2) {
-                jogador.posicao.x += jogador.velocidade;
-                glutPostRedisplay();
-            }
+            movimentaJogador('d');
             break;
         case ' ':
-            if (JOGO == ativo && !tiroJogador.ativo) {
-                inicializaTiro(&tiroJogador, jogador.posicao.x, jogador.posicao.y + jogador.dimensoes.y/2);
-                desenhaSprite(tiroJogador, 0.833, 0.339, 0.008, 0.036);
-                glutPostRedisplay();
-            }
+            jogadorAtira();
             break;
         case 'P':
         case 'p':
-            // pausa o Jogo
-            if (JOGO == ativo) {
-                JOGO = pause;
-            } else if (JOGO == pause) {
-                JOGO = ativo;
-            }
-            break;
+            pausa();
             break;
         case 'R':
         case 'r':
