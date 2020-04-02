@@ -2,5 +2,8 @@
 #define FALSE 0
 #define ALTURA_DO_MUNDO 200
 #define LARGURA_DO_MUNDO 200
+#define ALTURA_HUD 10
 #define QTD_INIMIGOS 10
 #define MAX_INIMIGOS_LINHA 5
+#define MAX_VIDAS 5
+#define VIDAS_INICIAIS 3

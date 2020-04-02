@@ -5,3 +5,5 @@ void escreveTexto(void* fonte, char* texto, float x, float y);
 GLuint carregaTextura(const char* arquivo);
 void inicializaJogo();
 void desenhaFundoJogo(GLuint textura);
+void verificaGameOver();
+void desenhaHud();
