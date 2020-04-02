@@ -174,7 +174,6 @@ void desenharMinhaCena()
     desenhaFundoJogo(idTexturaFundo);
     desenhaFase();
 
-
     if (JOGO == ativo) {
         movimentaInimigos();
     } else if (JOGO == pause) {

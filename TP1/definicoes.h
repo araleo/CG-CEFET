@@ -1,6 +1,6 @@
 #define TRUE 1
 #define FALSE 0
-#define ALTURA_DO_MUNDO 200
+#define ALTURA_DO_MUNDO 300
 #define LARGURA_DO_MUNDO 200
 #define ALTURA_HUD 10
 #define QTD_INIMIGOS 10
