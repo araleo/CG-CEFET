@@ -6,4 +6,5 @@ GLuint carregaTextura(const char* arquivo);
 void inicializaJogo();
 void desenhaFundoJogo(GLuint textura);
 void verificaGameOver();
+int verificaVitoria();
 void desenhaHud();

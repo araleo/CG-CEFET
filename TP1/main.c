@@ -9,7 +9,7 @@
 #include "declaracoes.h"
 #include "definicoes.h"
 
-enum estadosJogo {gameOver, ativo, pause} JOGO;
+enum estadosJogo {gameOver, ativo, pause, vitoria} JOGO;
 
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
@@ -23,6 +23,8 @@ tipoSprite iconeVidas[MAX_VIDAS];
 int VIDAS;
 int PONTOS;
 char strPontos[10];
+
+
 
 void desenhaHud()
 {
@@ -79,6 +81,7 @@ void detectaTiro(tipoSprite* tiro)
             } else if (alvo == &vetorInimigos[i]) {
                 alvo->ativo = FALSE;
                 PONTOS += ((-alvo->posicao.y + 150) / 10) + 10;
+                verificaVitoria();
             }
         }
     }
@@ -193,8 +196,10 @@ void desenharMinhaCena()
     } else if (JOGO == gameOver) {
         glColor3f(1, 0, 0);
         escreveTexto(GLUT_BITMAP_HELVETICA_18, "GAME OVER", -20, 0);
+    } else if (JOGO == vitoria) {
+        glColor3f(0, 1, 0);
+        escreveTexto(GLUT_BITMAP_HELVETICA_18, "VITORIA", -20, 0);
     }
-
 
     desenhaHud();
 
@@ -202,70 +207,14 @@ void desenharMinhaCena()
     glutSwapBuffers();
 }
 
-void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, float altura, float raio)
+int verificaVitoria()
 {
-    sprite->posicao.x = x;
-    sprite->posicao.y = y;
-    sprite->dimensoes.x = comprimento;
-    sprite->dimensoes.y = altura;
-    sprite->raio = raio;
-    sprite->ativo = TRUE;
-}
-
-void inicializaHud()
-{
-    int x = -LARGURA_DO_MUNDO/2 + 20;
-    int y = -ALTURA_DO_MUNDO/2 + 5;
-    int distancia = 10;
-
-    for (int i = 0; i < MAX_VIDAS; i++) {
-        inicializaSprite(&iconeVidas[i], x, y, 5, 5, 5);
-        x += distancia;
-        if(i >= VIDAS)
-            iconeVidas[i].ativo = FALSE;
-    }
-}
-
-void inicializaTiro(tipoSprite* tiro, float x, float y)
-{
-    inicializaSprite(tiro, x, y, 1, 5, 1);
-    if (tiro == &tiroJogador)
-        tiro->velocidade = 4;
-    else
-        tiro->velocidade = 2;
-}
-
-void inicializaInimigo()
-{
-    int x = -LARGURA_DO_MUNDO/2 + 20;
-    int y = ALTURA_DO_MUNDO * 0.4;
     for (int i = 0; i < QTD_INIMIGOS; i++) {
-        inicializaSprite(&vetorInimigos[i], x, y, 15, 15, 15/2);
-        vetorInimigos[i].velocidade = 0.001;
-        x += 20;
-        if ((i+1) % MAX_INIMIGOS_LINHA == 0){
-            y -= 30;
-            x = -LARGURA_DO_MUNDO/2 + 20;
+        if (vetorInimigos[i].ativo) {
+            return 0;
         }
     }
-}
-
-void inicializaJogador()
-{
-    inicializaSprite(&jogador, 0, -ALTURA_DO_MUNDO * 0.4, 20, 20, 20/2);
-    jogador.velocidade = 2;
-}
-
-void redimensiona(int w, int h)
-{
-    glViewport(0, 0, w, h);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-LARGURA_DO_MUNDO/2, LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, -1, 1);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    JOGO = vitoria;
 }
 
 void verificaGameOver()
@@ -326,6 +275,60 @@ void teclasEspeciais(int key, int x, int y)
     }
 }
 
+void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, float altura, float raio)
+{
+    sprite->posicao.x = x;
+    sprite->posicao.y = y;
+    sprite->dimensoes.x = comprimento;
+    sprite->dimensoes.y = altura;
+    sprite->raio = raio;
+    sprite->ativo = TRUE;
+}
+
+void inicializaHud()
+{
+    int x = -LARGURA_DO_MUNDO/2 + 20;
+    int y = -ALTURA_DO_MUNDO/2 + 5;
+    int distancia = 10;
+
+    for (int i = 0; i < MAX_VIDAS; i++) {
+        inicializaSprite(&iconeVidas[i], x, y, 5, 5, 5);
+        x += distancia;
+        if(i >= VIDAS)
+            iconeVidas[i].ativo = FALSE;
+    }
+}
+
+void inicializaTiro(tipoSprite* tiro, float x, float y)
+{
+    inicializaSprite(tiro, x, y, 1, 5, 1);
+    if (tiro == &tiroJogador)
+        tiro->velocidade = 4;
+    else
+        tiro->velocidade = 2;
+}
+
+void inicializaInimigo()
+{
+    int x = -LARGURA_DO_MUNDO/2 + 20;
+    int y = ALTURA_DO_MUNDO * 0.4;
+    for (int i = 0; i < QTD_INIMIGOS; i++) {
+        inicializaSprite(&vetorInimigos[i], x, y, 15, 15, 15/2);
+        vetorInimigos[i].velocidade = 0.001;
+        x += 20;
+        if ((i+1) % MAX_INIMIGOS_LINHA == 0){
+            y -= 30;
+            x = -LARGURA_DO_MUNDO/2 + 20;
+        }
+    }
+}
+
+void inicializaJogador()
+{
+    inicializaSprite(&jogador, 0, -ALTURA_DO_MUNDO * 0.4, 20, 20, 20/2);
+    jogador.velocidade = 2;
+}
+
 void inicializaJogo()
 {
     JOGO = ativo;
@@ -336,6 +339,18 @@ void inicializaJogo()
     inicializaJogador();
     inicializaInimigo();
     inicializaHud();
+}
+
+void redimensiona(int w, int h)
+{
+    glViewport(0, 0, w, h);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-LARGURA_DO_MUNDO/2, LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, -1, 1);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
 
 void inicializa()
