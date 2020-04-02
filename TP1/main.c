@@ -83,7 +83,7 @@ void movimentaTiros()
         detectaTiro(&tiroInimigo);
     }
 
-    if (tiroJogador.posicao.y > ALTURA_DO_MUNDO/2)
+    if (tiroJogador.posicao.y > ALTURA_DO_MUNDO/2 || tiroJogador.posicao.y > vetorInimigos[0].posicao.y + 30)
         tiroJogador.ativo = FALSE;
 
     if (JOGO == ativo && tiroJogador.ativo) {
@@ -217,7 +217,10 @@ void inicializaHud()
 void inicializaTiro(tipoSprite* tiro, float x, float y)
 {
     inicializaSprite(tiro, x, y, 1, 5, 1);
-    tiro->velocidade = 2;
+    if (tiro == &tiroJogador)
+        tiro->velocidade = 4;
+    else
+        tiro->velocidade = 2;
 }
 
 void inicializaInimigo()
