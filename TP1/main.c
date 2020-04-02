@@ -21,9 +21,17 @@ tipoSprite vetorInimigos[QTD_INIMIGOS];
 tipoSprite iconeVidas[MAX_VIDAS];
 
 int VIDAS;
+int PONTOS;
+char strPontos[10];
 
 void desenhaHud()
 {
+    // mostra os pontos do jogador
+    snprintf(strPontos, 10, "%d", PONTOS);
+    escreveTexto(GLUT_BITMAP_HELVETICA_18, "PONTOS: ", LARGURA_DO_MUNDO/2 - 45, -ALTURA_DO_MUNDO/2 + 2);
+    escreveTexto(GLUT_BITMAP_HELVETICA_18, strPontos, LARGURA_DO_MUNDO/2 - 20, -ALTURA_DO_MUNDO/2 + 2);
+
+    // desenha o fundo
     glColor3f(1, 1, 1);
     glBegin(GL_TRIANGLE_FAN);
         glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 1);
@@ -36,6 +44,7 @@ void desenhaHud()
     for (int i = 0; i < VIDAS; i++) {
         desenhaSprite(idTexturaSheet, iconeVidas[i], 0.490, 0.006, 0.036, 0.025);
     }
+
 }
 
 void inimigoAtira()
@@ -65,9 +74,11 @@ void detectaTiro(tipoSprite* tiro)
             tiro->ativo = FALSE;
             if (alvo == &jogador) {
                 VIDAS -= 1;
+                PONTOS -= 10;
                 verificaGameOver();
             } else if (alvo == &vetorInimigos[i]) {
                 alvo->ativo = FALSE;
+                PONTOS += ((-alvo->posicao.y + 150) / 10) + 10;
             }
         }
     }
@@ -183,6 +194,7 @@ void desenharMinhaCena()
         glColor3f(1, 0, 0);
         escreveTexto(GLUT_BITMAP_HELVETICA_18, "GAME OVER", -20, 0);
     }
+
 
     desenhaHud();
 
@@ -318,6 +330,7 @@ void inicializaJogo()
 {
     JOGO = ativo;
     VIDAS = VIDAS_INICIAIS;
+    PONTOS = 0;
     tiroInimigo.ativo = FALSE;
     tiroJogador.ativo = FALSE;
     inicializaJogador();
