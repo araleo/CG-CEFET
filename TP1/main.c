@@ -24,40 +24,13 @@ int VIDAS;
 int PONTOS;
 char strPontos[10];
 
-
-
-void desenhaHud()
-{
-    // mostra os pontos do jogador
-    snprintf(strPontos, 10, "%d", PONTOS);
-    escreveTexto(GLUT_BITMAP_HELVETICA_18, "PONTOS: ", LARGURA_DO_MUNDO/2 - 45, -ALTURA_DO_MUNDO/2 + 2);
-    escreveTexto(GLUT_BITMAP_HELVETICA_18, strPontos, LARGURA_DO_MUNDO/2 - 20, -ALTURA_DO_MUNDO/2 + 2);
-
-    // desenha o fundo
-    glColor3f(1, 1, 1);
-    glBegin(GL_TRIANGLE_FAN);
-        glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 1);
-        glVertex3f(LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 1);
-        glVertex3f(LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2 + ALTURA_HUD, 1);
-        glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2 + ALTURA_HUD, 1);
-    glEnd();
-
-    // desenha vidas
-    for (int i = 0; i < VIDAS; i++) {
-        desenhaSprite(idTexturaSheet, iconeVidas[i], 0.490, 0.006, 0.036, 0.025);
-    }
-
-}
-
 void inimigoAtira()
 {
     int sorteiaTiro = rand() % 32000;
     int sorteiaInimigo = rand() % QTD_INIMIGOS;
 
-    if (sorteiaTiro == 0 && !tiroInimigo.ativo && vetorInimigos[sorteiaInimigo].ativo) {
+    if (sorteiaTiro == 0 && !tiroInimigo.ativo && vetorInimigos[sorteiaInimigo].ativo)
         inicializaTiro(&tiroInimigo, vetorInimigos[sorteiaInimigo].posicao.x, vetorInimigos[sorteiaInimigo].posicao.y);
-        glutPostRedisplay();
-    }
 }
 
 void detectaTiro(tipoSprite* tiro)
@@ -105,8 +78,8 @@ void movimentaTiros()
         detectaTiro(&tiroJogador);
     }
 
-    glutPostRedisplay();
-    glutTimerFunc(33, movimentaTiros, 33);
+    // glutPostRedisplay();
+    glutTimerFunc(33, movimentaTiros, 0);
 }
 
 void jogadorAtira()
@@ -114,7 +87,7 @@ void jogadorAtira()
     if (JOGO == ativo && !tiroJogador.ativo) {
         inicializaTiro(&tiroJogador, jogador.posicao.x, jogador.posicao.y + jogador.dimensoes.y/2);
         desenhaSprite(idTexturaSheet, tiroJogador, 0.833, 0.339, 0.008, 0.036);
-        glutPostRedisplay();
+        // glutPostRedisplay();
     }
 }
 
@@ -129,7 +102,7 @@ void movimentaJogador(char lado)
             jogador.posicao.x += jogador.velocidade;
         }
     }
-    glutPostRedisplay();
+    // glutPostRedisplay();
 }
 
 void movimentaInimigos()
@@ -155,9 +128,9 @@ void movimentaInimigos()
                 }
             }
         }
+        glutPostRedisplay();
+        glutTimerFunc(33, movimentaInimigos, 0);
     }
-    glutPostRedisplay();
-    glutTimerFunc(33, movimentaInimigos, 33);
 }
 
 void desenhaFase()
@@ -174,6 +147,28 @@ void desenhaFase()
         if (vetorInimigos[i].ativo)
             desenhaSprite(idTexturaSheet, vetorInimigos[i], 0.413, 0.207, 0.090, 0.082);
     }
+}
+
+void desenhaHud()
+{
+    // mostra os pontos do jogador
+    snprintf(strPontos, 10, "%d", PONTOS);
+    escreveTexto(GLUT_BITMAP_HELVETICA_18, "PONTOS: ", LARGURA_DO_MUNDO/2 - 45, -ALTURA_DO_MUNDO/2 + 2);
+    escreveTexto(GLUT_BITMAP_HELVETICA_18, strPontos, LARGURA_DO_MUNDO/2 - 20, -ALTURA_DO_MUNDO/2 + 2);
+
+    // desenha o fundo
+    glColor3f(1, 1, 1);
+    glBegin(GL_TRIANGLE_FAN);
+        glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 1);
+        glVertex3f(LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 1);
+        glVertex3f(LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2 + ALTURA_HUD, 1);
+        glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2 + ALTURA_HUD, 1);
+    glEnd();
+
+    // desenha vidas
+    for (int i = 0; i < VIDAS; i++)
+        desenhaSprite(idTexturaSheet, iconeVidas[i], 0.490, 0.006, 0.036, 0.025);
+
 }
 
 void desenharMinhaCena()
@@ -308,7 +303,7 @@ void inicializaTiro(tipoSprite* tiro, float x, float y)
         tiro->velocidade = 2;
 }
 
-void inicializaInimigo()
+void inicializaInimigos()
 {
     int x = -LARGURA_DO_MUNDO/2 + 20;
     int y = ALTURA_DO_MUNDO * 0.4;
@@ -316,7 +311,7 @@ void inicializaInimigo()
         inicializaSprite(&vetorInimigos[i], x, y, 15, 15, 15/2);
         vetorInimigos[i].velocidade = 0.001;
         x += 20;
-        if ((i+1) % MAX_INIMIGOS_LINHA == 0){
+        if ((i+1) % MAX_INIMIGOS_LINHA == 0) {
             y -= 30;
             x = -LARGURA_DO_MUNDO/2 + 20;
         }
@@ -337,7 +332,7 @@ void inicializaJogo()
     tiroInimigo.ativo = FALSE;
     tiroJogador.ativo = FALSE;
     inicializaJogador();
-    inicializaInimigo();
+    inicializaInimigos();
     inicializaHud();
 }
 
@@ -377,7 +372,7 @@ int main(int argc, char** argv)
     glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(800, 600);
-    glutInitWindowPosition(100, 100);
+    glutInitWindowPosition(0, 0);
     glutCreateWindow("Jogo");
 
     // registro de callbacks
@@ -385,6 +380,7 @@ int main(int argc, char** argv)
     glutReshapeFunc(redimensiona);
     glutKeyboardFunc(teclaPressionada);
     glutSpecialFunc(teclasEspeciais);
+
     glutTimerFunc(0, movimentaInimigos, 33);
     glutTimerFunc(0, movimentaTiros, 33);
 
