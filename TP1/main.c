@@ -159,6 +159,7 @@ void desenhaHud()
     glEnd();
 
     // mostra os pontos do jogador
+    glColor4f(1, 1, 1, 1);
     snprintf(strPontos, 10, "%d", PONTOS);
     escreveTexto(GLUT_BITMAP_HELVETICA_18, "PONTOS: ", LARGURA_DO_MUNDO/2 - 45, -ALTURA_DO_MUNDO/2 + 2);
     escreveTexto(GLUT_BITMAP_HELVETICA_18, strPontos, LARGURA_DO_MUNDO/2 - 20, -ALTURA_DO_MUNDO/2 + 2);
