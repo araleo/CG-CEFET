@@ -127,7 +127,7 @@ void movimentaInimigos()
             }
         }
         glutPostRedisplay();
-        glutTimerFunc(33, movimentaInimigos, 0);
+        glutTimerFunc(60, movimentaInimigos, 60);
     }
 }
 
@@ -197,11 +197,9 @@ void desenharMinhaCena()
 
 int verificaVitoria()
 {
-    for (int i = 0; i < QTD_INIMIGOS; i++) {
-        if (vetorInimigos[i].ativo) {
+    for (int i = 0; i < QTD_INIMIGOS; i++)
+        if (vetorInimigos[i].ativo)
             return 0;
-        }
-    }
     JOGO = vitoria;
 }
 
