@@ -9,3 +9,4 @@ void desenhaFundoJogo(GLuint textura);
 void verificaGameOver();
 int verificaVitoria();
 void desenhaHud();
+void inicializaItem(tipoSprite* item, float x, float y);

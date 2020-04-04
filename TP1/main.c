@@ -10,6 +10,7 @@
 #include "definicoes.h"
 
 enum estadosJogo {gameOver, ativo, pause, vitoria} JOGO;
+enum itens {vida, velocidade, tiro} ITENS;
 
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
@@ -19,16 +20,47 @@ tipoSprite tiroJogador;
 tipoSprite tiroInimigo;
 tipoSprite vetorInimigos[QTD_INIMIGOS];
 tipoSprite iconeVidas[MAX_VIDAS];
+tipoSprite itemDrop;
 
 int VIDAS;
 int PONTOS;
 char strPontos[10];
+int TIRO_ESPECIAL = FALSE;
+
+void detectaItem()
+{
+    if (detectaColisao(jogador, itemDrop)) {
+        itemDrop.ativo = FALSE;
+        PONTOS += 10;
+
+        if (ITENS == vida && VIDAS < 5)
+            VIDAS += 1;
+        else if (ITENS == velocidade && jogador.velocidade < 5)
+            jogador.velocidade += 1;
+        else if (ITENS == tiro)
+            TIRO_ESPECIAL = TRUE;
+    }
+}
+
+void dropaItem(float x, float y)
+{
+    inicializaItem(&itemDrop, x, y);
+    glutPostRedisplay();
+}
+
+void sorteiaItem(tipoSprite inimigo)
+{
+    int sorteio = rand() % 6;
+    if (sorteio < 3) {
+        ITENS = sorteio;
+        dropaItem(inimigo.posicao.x, inimigo.posicao.y);
+    }
+}
 
 void inimigoAtira()
 {
     int sorteiaTiro = rand() % 32000;
     int sorteiaInimigo = rand() % QTD_INIMIGOS;
-
     if (sorteiaTiro == 0 && !tiroInimigo.ativo && vetorInimigos[sorteiaInimigo].ativo)
         inicializaTiro(&tiroInimigo, vetorInimigos[sorteiaInimigo].posicao.x, vetorInimigos[sorteiaInimigo].posicao.y);
 }
@@ -53,6 +85,8 @@ void detectaTiro(tipoSprite* tiro)
                 alvo->ativo = FALSE;
                 PONTOS += ((-alvo->posicao.y + 150) / 10) + 10;
                 verificaVitoria();
+                if (!itemDrop.ativo)
+                    sorteiaItem(*alvo);
             }
         }
     }
@@ -60,6 +94,7 @@ void detectaTiro(tipoSprite* tiro)
 
 void movimentaTiros()
 {
+    // movimenta os tiros dos inimigos
     if (tiroInimigo.posicao.y < -ALTURA_DO_MUNDO/2)
         tiroInimigo.ativo = FALSE;
 
@@ -68,12 +103,22 @@ void movimentaTiros()
         detectaTiro(&tiroInimigo);
     }
 
+    // movimenta os tiros do jogador
     if (tiroJogador.posicao.y > ALTURA_DO_MUNDO/2 || tiroJogador.posicao.y > vetorInimigos[0].posicao.y + 30)
         tiroJogador.ativo = FALSE;
 
     if (JOGO == ativo && tiroJogador.ativo) {
         tiroJogador.posicao.y += tiroJogador.velocidade;
         detectaTiro(&tiroJogador);
+    }
+
+    // movimenta os itens
+    if (itemDrop.posicao.y < -ALTURA_DO_MUNDO/2)
+        itemDrop.ativo = FALSE;
+
+    if (JOGO == ativo && itemDrop.ativo) {
+        itemDrop.posicao.y -= itemDrop.velocidade;
+        detectaItem();
     }
 
     // glutPostRedisplay();
@@ -111,8 +156,8 @@ void movimentaInimigos()
                 if (vetorInimigos[i].posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
                     // jogador perdeu - um inimigo chegou no "chão"
                     JOGO = gameOver;
-                } else if (vetorInimigos[i].posicao.x <= -LARGURA_DO_MUNDO/2 + vetorInimigos[i].dimensoes.x/2 ||
-                            vetorInimigos[i].posicao.x >= LARGURA_DO_MUNDO/2 - vetorInimigos[i].dimensoes.x/2) {
+                } else if (vetorInimigos[i].posicao.x <= -LARGURA_DO_MUNDO/2 + vetorInimigos[i].dimensoes.x/2
+                          || vetorInimigos[i].posicao.x >= LARGURA_DO_MUNDO/2 - vetorInimigos[i].dimensoes.x/2) {
                     // move verticalmente e altera a direção
                     for (int j = 0; j < QTD_INIMIGOS; j++) {
                         vetorInimigos[j].posicao.y -= 20;
@@ -127,24 +172,39 @@ void movimentaInimigos()
             }
         }
         glutPostRedisplay();
-        glutTimerFunc(60, movimentaInimigos, 60);
+        glutTimerFunc(33, movimentaInimigos, 0);
     }
 }
 
 void desenhaFase()
 {
+    // desenha nave do jogador
     desenhaSprite(idTexturaSheet, jogador, 0.000, 0.007, 0.109, 0.073);
 
+    // desenha tiro do jogador se ativo
     if (tiroJogador.ativo)
         desenhaSprite(idTexturaSheet, tiroJogador, 0.834, 0.339, 0.008, 0.036);
 
+    // desenha tiro dos inimigos se ativo
     if (tiroInimigo.ativo)
         desenhaSprite(idTexturaSheet, tiroInimigo, 0.835, 0.151, 0.008, 0.055);
 
+    // desenha naves dos inimigos
     for (int i = 0; i < QTD_INIMIGOS; i++) {
         if (vetorInimigos[i].ativo)
             desenhaSprite(idTexturaSheet, vetorInimigos[i], 0.413, 0.207, 0.090, 0.082);
     }
+
+    // desenha itens de drop se ativos
+    if (itemDrop.ativo) {
+        if (ITENS == vida)
+            desenhaSprite(idTexturaSheet, itemDrop, 0.217, 0.874, 0.021, 0.020);
+        else if (ITENS == velocidade)
+            desenhaSprite(idTexturaSheet, itemDrop, 0.790, 0.543, 0.018, 0.029);
+        else if (ITENS == tiro)
+            desenhaSprite(idTexturaSheet, itemDrop, 0.760, 0.426, 0.030, 0.029);
+    }
+
 }
 
 void desenhaHud()
@@ -286,11 +346,23 @@ void inicializaHud()
     }
 }
 
+void inicializaItem(tipoSprite* item, float x, float y)
+{
+    inicializaSprite(item, x, y, 7, 7, 7/2);
+    item->velocidade = 2;
+}
+
 void inicializaTiro(tipoSprite* tiro, float x, float y)
 {
     inicializaSprite(tiro, x, y, 1, 5, 1);
-    if (tiro == &tiroJogador)
+    if (tiro == &tiroJogador) {
         tiro->velocidade = 4;
+        if (TIRO_ESPECIAL) {
+            tiro->dimensoes.x = 2;
+            tiro->dimensoes.y = 10;
+            tiro->raio = 3;
+        }
+    }
     else
         tiro->velocidade = 2;
 }
@@ -319,10 +391,12 @@ void inicializaJogador()
 void inicializaJogo()
 {
     JOGO = ativo;
-    VIDAS = VIDAS_INICIAIS;
     PONTOS = 0;
+    VIDAS = VIDAS_INICIAIS;
+    TIRO_ESPECIAL = FALSE;
     tiroInimigo.ativo = FALSE;
     tiroJogador.ativo = FALSE;
+    itemDrop.ativo = FALSE;
     inicializaJogador();
     inicializaInimigos();
     inicializaHud();
