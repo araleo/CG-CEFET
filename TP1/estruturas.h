@@ -10,5 +10,4 @@ typedef struct spriteStruct
     float raio;
     float velocidade;
     int ativo;
-    int textura;
 } tipoSprite;

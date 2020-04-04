@@ -24,6 +24,22 @@ int VIDAS;
 int PONTOS;
 char strPontos[10];
 
+void imprime()
+{
+    printf("%d\n", JOGO);
+    printf("JOGADOR:\nposicao: x=%f, y=%f\ndimensoes: x=%f, y=%f\nraio: %f\nvelocidade: %f\nativo: %d\n----------\n", jogador.posicao.x, jogador.posicao.y, jogador.dimensoes.x, jogador.dimensoes.y, jogador.raio, jogador.velocidade, jogador.ativo);
+    printf("TIRO J:\nposicao: x=%f, y=%f\ndimensoes: x=%f, y=%f\nraio: %f\nvelocidade: %f\nativo: %d\n----------\n", tiroJogador.posicao.x, tiroJogador.posicao.y, tiroJogador.dimensoes.x, tiroJogador.dimensoes.y, tiroJogador.raio, tiroJogador.velocidade, tiroJogador.ativo);
+    printf("TIRO I:\nposicao: x=%f, y=%f\ndimensoes: x=%f, y=%f\nraio: %f\nvelocidade: %f\nativo: %d\n----------\n", tiroInimigo.posicao.x, tiroInimigo.posicao.y, tiroInimigo.dimensoes.x, tiroInimigo.dimensoes.y, tiroInimigo.raio, tiroInimigo.velocidade, tiroInimigo.ativo);
+
+    for (int i = 0; i < QTD_INIMIGOS; i++) {
+        printf("INIMIGO %d:\nposicao: x=%f, y=%f\ndimensoes: x=%f, y=%f\nraio: %f\nvelocidade: %f\nativo: %d\n----------\n", i, vetorInimigos[i].posicao.x, vetorInimigos[i].posicao.y, vetorInimigos[i].dimensoes.x, vetorInimigos[i].dimensoes.y, vetorInimigos[i].raio, vetorInimigos[i].velocidade, vetorInimigos[i].ativo);
+    }
+
+    printf("VIDAS: %d\n", VIDAS);
+    printf("PONTOS: %d\n", PONTOS);
+    printf("\n\n\n\n\n");
+}
+
 void inimigoAtira()
 {
     int sorteiaTiro = rand() % 32000;
@@ -35,23 +51,21 @@ void inimigoAtira()
 
 void detectaTiro(tipoSprite* tiro)
 {
-    tipoSprite* alvo;
-    float dist;
+    tipoSprite* alvo = NULL;
 
-    for (int i = 0; i < QTD_INIMIGOS; i++) {
-        if (tiro == &tiroJogador)
-            alvo = &vetorInimigos[i];
-        else if (tiro == &tiroInimigo)
-            alvo = &jogador;
-
-        dist = formulaDistancia(tiro->posicao.x, alvo->posicao.x, tiro->posicao.y, alvo->posicao.y);
-        if (tiro->ativo && alvo->ativo && dist <= tiro->raio + alvo->raio) {
+    if (tiro == &tiroInimigo) {
+        alvo = &jogador;
+        if (tiro->ativo && detectaColisao(*alvo, *tiro)) {
             tiro->ativo = FALSE;
-            if (alvo == &jogador) {
-                VIDAS -= 1;
-                PONTOS -= 10;
-                verificaGameOver();
-            } else if (alvo == &vetorInimigos[i]) {
+            VIDAS -= 1;
+            PONTOS -= 10;
+            verificaGameOver();
+        }
+    } else if (tiro == &tiroJogador) {
+        for (int i = 0; i < QTD_INIMIGOS; i++) {
+            alvo = &vetorInimigos[i];
+            if (tiro->ativo && alvo->ativo && detectaColisao(*alvo, *tiro)) {
+                tiro->ativo = FALSE;
                 alvo->ativo = FALSE;
                 PONTOS += ((-alvo->posicao.y + 150) / 10) + 10;
                 verificaVitoria();
@@ -151,13 +165,8 @@ void desenhaFase()
 
 void desenhaHud()
 {
-    // mostra os pontos do jogador
-    snprintf(strPontos, 10, "%d", PONTOS);
-    escreveTexto(GLUT_BITMAP_HELVETICA_18, "PONTOS: ", LARGURA_DO_MUNDO/2 - 45, -ALTURA_DO_MUNDO/2 + 2);
-    escreveTexto(GLUT_BITMAP_HELVETICA_18, strPontos, LARGURA_DO_MUNDO/2 - 20, -ALTURA_DO_MUNDO/2 + 2);
-
     // desenha o fundo
-    glColor3f(1, 1, 1);
+    glColor4f(1, 1, 1, 0.4);
     glBegin(GL_TRIANGLE_FAN);
         glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 1);
         glVertex3f(LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 1);
@@ -165,10 +174,14 @@ void desenhaHud()
         glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2 + ALTURA_HUD, 1);
     glEnd();
 
+    // mostra os pontos do jogador
+    snprintf(strPontos, 10, "%d", PONTOS);
+    escreveTexto(GLUT_BITMAP_HELVETICA_18, "PONTOS: ", LARGURA_DO_MUNDO/2 - 45, -ALTURA_DO_MUNDO/2 + 2);
+    escreveTexto(GLUT_BITMAP_HELVETICA_18, strPontos, LARGURA_DO_MUNDO/2 - 20, -ALTURA_DO_MUNDO/2 + 2);
+
     // desenha vidas
     for (int i = 0; i < VIDAS; i++)
         desenhaSprite(idTexturaSheet, iconeVidas[i], 0.490, 0.006, 0.036, 0.025);
-
 }
 
 void desenharMinhaCena()
@@ -176,12 +189,10 @@ void desenharMinhaCena()
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(1, 1, 1);
 
-    // habilita texturas
-    glEnable(GL_TEXTURE_2D);
-
     // desenhos
     desenhaFundoJogo(idTexturaFundo);
     desenhaFase();
+    desenhaHud();
 
     if (JOGO == ativo) {
         movimentaInimigos();
@@ -190,15 +201,12 @@ void desenharMinhaCena()
         escreveTexto(GLUT_BITMAP_HELVETICA_18, "JOGO PAUSADO", -20, 0);
     } else if (JOGO == gameOver) {
         glColor3f(1, 0, 0);
-        escreveTexto(GLUT_BITMAP_HELVETICA_18, "GAME OVER", -20, 0);
+        escreveTexto(GLUT_BITMAP_HELVETICA_18, "GAME OVER", -15, 0);
     } else if (JOGO == vitoria) {
         glColor3f(0, 1, 0);
-        escreveTexto(GLUT_BITMAP_HELVETICA_18, "VITORIA", -20, 0);
+        escreveTexto(GLUT_BITMAP_HELVETICA_18, "VITORIA", -10, 0);
     }
 
-    desenhaHud();
-
-    glDisable(GL_TEXTURE_2D);
     glutSwapBuffers();
 }
 
@@ -226,6 +234,7 @@ void pausa()
         JOGO = pause;
     else if (JOGO == pause)
         JOGO = ativo;
+    glutPostRedisplay();
 }
 
 void teclaPressionada(unsigned char key, int x, int y)
@@ -334,6 +343,7 @@ void inicializaJogo()
     inicializaJogador();
     inicializaInimigos();
     inicializaHud();
+    glutPostRedisplay();
 }
 
 void redimensiona(int w, int h)
@@ -368,9 +378,9 @@ int main(int argc, char** argv)
 
     // inicialização do glut
     glutInit(&argc, argv);
-    glutInitContextVersion(1, 1);
-    glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    // glutInitContextVersion(1, 1);
+    // glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(0, 0);
     glutCreateWindow("Jogo");
@@ -381,8 +391,8 @@ int main(int argc, char** argv)
     glutKeyboardFunc(teclaPressionada);
     glutSpecialFunc(teclasEspeciais);
 
-    glutTimerFunc(0, movimentaInimigos, 33);
-    glutTimerFunc(0, movimentaTiros, 33);
+    glutTimerFunc(0, movimentaInimigos, 0);
+    glutTimerFunc(0, movimentaTiros, 0);
 
     // configura variaveis de estado
     inicializa();

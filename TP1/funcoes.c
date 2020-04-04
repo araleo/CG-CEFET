@@ -18,6 +18,14 @@ float formulaDistancia(float x1, float x2, float y1, float y2)
     return sqrt(pow(x, 2) + pow(y, 2));
 }
 
+int detectaColisao(tipoSprite s1, tipoSprite s2)
+{
+    double distancia = formulaDistancia(s1.posicao.x, s2.posicao.x, s1.posicao.y, s2.posicao.y);
+    if (distancia <= s1.raio + s2.raio)
+        return 1;
+    return 0;
+}
+
 void escreveTexto(void* fonte, char* texto, float x, float y)
 {
     glRasterPos2f(x, y);
@@ -42,10 +50,9 @@ GLuint carregaTextura(const char* arquivo)
 
 void desenhaFundoJogo(GLuint textura)
 {
-    // usa textura
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, textura);
     glBegin(GL_TRIANGLE_FAN);
-        // Associamos um canto da textura para cada vértice
         glTexCoord2f(0, 0);
         glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 0);
 
@@ -58,15 +65,17 @@ void desenhaFundoJogo(GLuint textura)
         glTexCoord2f(0, 1);
         glVertex3f(-LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, 0);
     glEnd();
+    glDisable(GL_TEXTURE_2D);
 }
 
 void desenhaSprite(GLuint textura, tipoSprite sprite, float sheetX, float sheetY, float comprimento, float altura)
 {
+
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, textura);
     glPushMatrix();
         glTranslatef(sprite.posicao.x, sprite.posicao.y, 0);
         glBegin(GL_TRIANGLE_FAN);
-            // Associamos um canto da textura para cada vértice
             glTexCoord2f(sheetX, sheetY);
             glVertex3f(-sprite.dimensoes.x/2, -sprite.dimensoes.y/2, 0);
 
@@ -80,4 +89,5 @@ void desenhaSprite(GLuint textura, tipoSprite sprite, float sheetX, float sheetY
             glVertex3f(-sprite.dimensoes.x/2, sprite.dimensoes.y/2, 0);
         glEnd();
     glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
 }
