@@ -64,18 +64,18 @@ void detectaTiro(tipoSprite* tiro)
 {
     tipoSprite* alvo = NULL;
 
-    if (tiro == &tiroInimigo) {
+    if (tiro == &tiroInimigo && tiro->ativo) {
         alvo = &jogador;
-        if (tiro->ativo && detectaColisao(*alvo, *tiro)) {
+        if (detectaColisao(*alvo, *tiro)) {
             tiro->ativo = FALSE;
             VIDAS -= 1;
             PONTOS -= 10;
             verificaGameOver();
         }
-    } else if (tiro == &tiroJogador) {
+    } else if (tiro == &tiroJogador && tiro->ativo) {
         for (int i = 0; i < QTD_INIMIGOS; i++) {
             alvo = &vetorInimigos[i];
-            if (tiro->ativo && alvo->ativo && detectaColisao(*alvo, *tiro)) {
+            if (alvo->ativo && detectaColisao(*alvo, *tiro)) {
                 tiro->ativo = FALSE;
                 alvo->ativo = FALSE;
                 PONTOS += ((-alvo->posicao.y + 150) / 10) + 10;
