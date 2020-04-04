@@ -24,22 +24,6 @@ int VIDAS;
 int PONTOS;
 char strPontos[10];
 
-void imprime()
-{
-    printf("%d\n", JOGO);
-    printf("JOGADOR:\nposicao: x=%f, y=%f\ndimensoes: x=%f, y=%f\nraio: %f\nvelocidade: %f\nativo: %d\n----------\n", jogador.posicao.x, jogador.posicao.y, jogador.dimensoes.x, jogador.dimensoes.y, jogador.raio, jogador.velocidade, jogador.ativo);
-    printf("TIRO J:\nposicao: x=%f, y=%f\ndimensoes: x=%f, y=%f\nraio: %f\nvelocidade: %f\nativo: %d\n----------\n", tiroJogador.posicao.x, tiroJogador.posicao.y, tiroJogador.dimensoes.x, tiroJogador.dimensoes.y, tiroJogador.raio, tiroJogador.velocidade, tiroJogador.ativo);
-    printf("TIRO I:\nposicao: x=%f, y=%f\ndimensoes: x=%f, y=%f\nraio: %f\nvelocidade: %f\nativo: %d\n----------\n", tiroInimigo.posicao.x, tiroInimigo.posicao.y, tiroInimigo.dimensoes.x, tiroInimigo.dimensoes.y, tiroInimigo.raio, tiroInimigo.velocidade, tiroInimigo.ativo);
-
-    for (int i = 0; i < QTD_INIMIGOS; i++) {
-        printf("INIMIGO %d:\nposicao: x=%f, y=%f\ndimensoes: x=%f, y=%f\nraio: %f\nvelocidade: %f\nativo: %d\n----------\n", i, vetorInimigos[i].posicao.x, vetorInimigos[i].posicao.y, vetorInimigos[i].dimensoes.x, vetorInimigos[i].dimensoes.y, vetorInimigos[i].raio, vetorInimigos[i].velocidade, vetorInimigos[i].ativo);
-    }
-
-    printf("VIDAS: %d\n", VIDAS);
-    printf("PONTOS: %d\n", PONTOS);
-    printf("\n\n\n\n\n");
-}
-
 void inimigoAtira()
 {
     int sorteiaTiro = rand() % 32000;
