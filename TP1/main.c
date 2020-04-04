@@ -24,7 +24,7 @@ tipoSprite itemDrop;
 
 int VIDAS;
 int PONTOS;
-char strPontos[10];
+char STR_PONTOS[10];
 int TIRO_ESPECIAL = FALSE;
 
 void detectaItem()
@@ -42,18 +42,13 @@ void detectaItem()
     }
 }
 
-void dropaItem(float x, float y)
-{
-    inicializaItem(&itemDrop, x, y);
-    glutPostRedisplay();
-}
-
 void sorteiaItem(tipoSprite inimigo)
 {
     int sorteio = rand() % 6;
     if (sorteio < 3) {
         ITENS = sorteio;
-        dropaItem(inimigo.posicao.x, inimigo.posicao.y);
+        inicializaItem(&itemDrop, inimigo.posicao.x, inimigo.posicao.y);
+        glutPostRedisplay();
     }
 }
 
@@ -189,7 +184,7 @@ void desenhaFase()
     if (tiroInimigo.ativo)
         desenhaSprite(idTexturaSheet, tiroInimigo, 0.835, 0.151, 0.008, 0.055);
 
-    // desenha naves dos inimigos
+    // desenha naves ativas dos inimigos
     for (int i = 0; i < QTD_INIMIGOS; i++) {
         if (vetorInimigos[i].ativo)
             desenhaSprite(idTexturaSheet, vetorInimigos[i], 0.413, 0.207, 0.090, 0.082);
@@ -204,7 +199,6 @@ void desenhaFase()
         else if (ITENS == tiro)
             desenhaSprite(idTexturaSheet, itemDrop, 0.760, 0.426, 0.030, 0.029);
     }
-
 }
 
 void desenhaHud()
@@ -220,9 +214,9 @@ void desenhaHud()
 
     // mostra os pontos do jogador
     glColor4f(1, 1, 1, 1);
-    snprintf(strPontos, 10, "%d", PONTOS);
+    snprintf(STR_PONTOS, 10, "%d", PONTOS);
     escreveTexto(GLUT_BITMAP_HELVETICA_18, "PONTOS: ", LARGURA_DO_MUNDO/2 - 45, -ALTURA_DO_MUNDO/2 + 2);
-    escreveTexto(GLUT_BITMAP_HELVETICA_18, strPontos, LARGURA_DO_MUNDO/2 - 20, -ALTURA_DO_MUNDO/2 + 2);
+    escreveTexto(GLUT_BITMAP_HELVETICA_18, STR_PONTOS, LARGURA_DO_MUNDO/2 - 20, -ALTURA_DO_MUNDO/2 + 2);
 
     // desenha vidas
     for (int i = 0; i < VIDAS; i++)
@@ -348,7 +342,7 @@ void inicializaHud()
 
 void inicializaItem(tipoSprite* item, float x, float y)
 {
-    inicializaSprite(item, x, y, 7, 7, 7/2);
+    inicializaSprite(item, x, y, 8, 8, 4);
     item->velocidade = 2;
 }
 
@@ -392,7 +386,6 @@ void inicializaJogo()
 {
     JOGO = ativo;
     PONTOS = 0;
-
     VIDAS = VIDAS_INICIAIS;
     TIRO_ESPECIAL = FALSE;
     tiroInimigo.ativo = FALSE;
@@ -407,11 +400,9 @@ void inicializaJogo()
 void redimensiona(int w, int h)
 {
     glViewport(0, 0, w, h);
-
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(-LARGURA_DO_MUNDO/2, LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, -1, 1);
-
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
@@ -436,8 +427,8 @@ int main(int argc, char** argv)
 
     // inicialização do glut
     glutInit(&argc, argv);
-    // glutInitContextVersion(1, 1);
-    // glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+    glutInitContextVersion(1, 1);
+    glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(0, 0);
@@ -452,7 +443,7 @@ int main(int argc, char** argv)
     glutTimerFunc(0, movimentaInimigos, 0);
     glutTimerFunc(0, movimentaProps, 0);
 
-    // configura variaveis de estado
+    // configura variaveis do glut
     inicializa();
 
     // inicializa variaveis do jogo
