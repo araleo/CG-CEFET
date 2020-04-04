@@ -92,7 +92,7 @@ void detectaTiro(tipoSprite* tiro)
     }
 }
 
-void movimentaTiros()
+void movimentaProps()
 {
     // movimenta os tiros dos inimigos
     if (tiroInimigo.posicao.y < -ALTURA_DO_MUNDO/2)
@@ -122,7 +122,7 @@ void movimentaTiros()
     }
 
     // glutPostRedisplay();
-    glutTimerFunc(33, movimentaTiros, 0);
+    glutTimerFunc(33, movimentaProps, 0);
 }
 
 void jogadorAtira()
@@ -392,6 +392,7 @@ void inicializaJogo()
 {
     JOGO = ativo;
     PONTOS = 0;
+
     VIDAS = VIDAS_INICIAIS;
     TIRO_ESPECIAL = FALSE;
     tiroInimigo.ativo = FALSE;
@@ -449,7 +450,7 @@ int main(int argc, char** argv)
     glutSpecialFunc(teclasEspeciais);
 
     glutTimerFunc(0, movimentaInimigos, 0);
-    glutTimerFunc(0, movimentaTiros, 0);
+    glutTimerFunc(0, movimentaProps, 0);
 
     // configura variaveis de estado
     inicializa();
