@@ -19,6 +19,7 @@ GLuint idTexturaSheet;
 tipoSprite jogador;
 tipoSprite tiroJogador;
 tipoSprite tiroInimigo;
+tipoSprite tiroInimigoEspecial;
 tipoSprite vetorInimigos[QTD_INIMIGOS];
 tipoSprite iconeVidas[MAX_VIDAS];
 tipoSprite itemDrop;
@@ -61,17 +62,22 @@ void sorteiaItem(tipoSprite inimigo)
 
 void inimigoAtira()
 {
-    int sorteiaTiro = rand() % 32000;
     int sorteiaInimigo = rand() % QTD_INIMIGOS;
-    if (sorteiaTiro == 0 && !tiroInimigo.ativo && vetorInimigos[sorteiaInimigo].ativo)
-        inicializaTiro(&tiroInimigo, vetorInimigos[sorteiaInimigo].posicao.x, vetorInimigos[sorteiaInimigo].posicao.y);
+
+    if (vetorInimigos[sorteiaInimigo].especial && vetorInimigos[sorteiaInimigo].ativo && !tiroInimigoEspecial.ativo) {
+        inicializaTiro(&tiroInimigoEspecial, vetorInimigos[sorteiaInimigo].posicao.x, vetorInimigos[sorteiaInimigo].posicao.y);
+    } else {
+        int sorteiaTiro = rand() % 32000;
+        if (sorteiaTiro == 0 && !tiroInimigo.ativo && vetorInimigos[sorteiaInimigo].ativo)
+            inicializaTiro(&tiroInimigo, vetorInimigos[sorteiaInimigo].posicao.x, vetorInimigos[sorteiaInimigo].posicao.y);
+    }
 }
 
 void detectaTiro(tipoSprite* tiro)
 {
     tipoSprite* alvo = NULL;
 
-    if (tiro == &tiroInimigo && tiro->ativo) {
+    if ((tiro == &tiroInimigo || tiro == &tiroInimigoEspecial) && tiro->ativo) {
         alvo = &jogador;
         if (detectaColisao(*alvo, *tiro)) {
             tiro->ativo = FALSE;
@@ -86,9 +92,13 @@ void detectaTiro(tipoSprite* tiro)
                 tiro->ativo = FALSE;
                 alvo->ativo = FALSE;
                 PONTOS += ((-alvo->posicao.y + 150) / 10) + 10;
-                verificaVitoria();
-                if (!itemDrop.ativo)
-                    sorteiaItem(*alvo);
+                if (alvo->especial)
+                    PONTOS += 20;
+
+                if (!verificaVitoria()) {
+                    if (!itemDrop.ativo)
+                        sorteiaItem(*alvo);
+                }
             }
         }
     }
@@ -103,6 +113,15 @@ void movimentaProps()
     if (JOGO == ativo && tiroInimigo.ativo) {
         tiroInimigo.posicao.y -= tiroInimigo.velocidade;
         detectaTiro(&tiroInimigo);
+    }
+
+    // movimenta os tiros dos inimigos especiais
+    if (tiroInimigoEspecial.posicao.y < -ALTURA_DO_MUNDO/2)
+        tiroInimigoEspecial.ativo = FALSE;
+
+    if (JOGO == ativo && tiroInimigoEspecial.ativo) {
+        tiroInimigoEspecial.posicao.y -= tiroInimigoEspecial.velocidade;
+        detectaTiro(&tiroInimigoEspecial);
     }
 
     // movimenta os tiros do jogador
@@ -195,7 +214,7 @@ void desenhaInimigos()
     for (int i = 0; i < QTD_INIMIGOS; i++) {
         if (vetorInimigos[i].ativo) {
             if (vetorInimigos[i].especial)
-                desenhaSprite(idTexturaSheet, vetorInimigos[i], 0.117, 0.410, 0.101, 0.082);
+                desenhaSprite(idTexturaSheet, vetorInimigos[i], 0.140, 0.631, 0.101, 0.082);
             else
                 desenhaSprite(idTexturaSheet, vetorInimigos[i], 0.413, 0.207, 0.090, 0.082);
         }
@@ -208,12 +227,20 @@ void desenhaFase()
     desenhaSprite(idTexturaSheet, jogador, 0.000, 0.007, 0.109, 0.073);
 
     // desenha tiro do jogador se ativo
-    if (tiroJogador.ativo)
-        desenhaSprite(idTexturaSheet, tiroJogador, 0.834, 0.339, 0.008, 0.036);
+    if (tiroJogador.ativo) {
+        if (TIRO_ESPECIAL)
+            desenhaSprite(idTexturaSheet, tiroJogador, 0.815, 0.265, 0.012, 0.055);
+        else
+            desenhaSprite(idTexturaSheet, tiroJogador, 0.834, 0.339, 0.008, 0.036);
+    }
 
     // desenha tiro dos inimigos se ativo
     if (tiroInimigo.ativo)
         desenhaSprite(idTexturaSheet, tiroInimigo, 0.835, 0.151, 0.008, 0.055);
+
+    // desenha tiro dos inimigos especiais se ativo
+    if (tiroInimigoEspecial.ativo)
+        desenhaSprite(idTexturaSheet, tiroInimigoEspecial, 0.815, 0.265, 0.012, 0.055);
 
     // desenha naves ativas dos inimigos
     desenhaInimigos();
@@ -274,6 +301,7 @@ void proximaFase()
 {
     FASES += 1;
     tiroInimigo.ativo = FALSE;
+    tiroInimigoEspecial.ativo = FALSE;
     tiroJogador.ativo = FALSE;
     itemDrop.ativo = FALSE;
     inicializaInimigos();
@@ -286,9 +314,9 @@ int verificaVitoria()
         if (vetorInimigos[i].ativo)
             return 0;
 
-    if (FASES < segunda)
+    if (FASES < terceira)
         proximaFase();
-    else if (FASES == segunda)
+    else if (FASES == terceira)
         JOGO = vitoria;
 }
 
@@ -393,8 +421,14 @@ void inicializaTiro(tipoSprite* tiro, float x, float y)
             tiro->raio = 3;
         }
     }
-    else
+    else if (tiro == &tiroInimigoEspecial) {
+        tiro->dimensoes.x = 2;
+        tiro->dimensoes.y = 10;
+        tiro->raio = 3;
+        tiro->velocidade = 3;
+    } else {
         tiro->velocidade = 2;
+    }
 }
 
 void inicializaEspeciais()
@@ -423,7 +457,7 @@ void inicializaInimigos()
         }
     }
 
-    if (FASES == segunda)
+    if (FASES == segunda || FASES == terceira)
         inicializaEspeciais();
 }
 
@@ -442,6 +476,7 @@ void inicializaJogo()
     TIRO_ESPECIAL = FALSE;
     QTD_ESPECIAIS = 0;
     tiroInimigo.ativo = FALSE;
+    tiroInimigoEspecial.ativo = FALSE;
     tiroJogador.ativo = FALSE;
     itemDrop.ativo = FALSE;
     inicializaJogador();
