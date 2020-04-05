@@ -7,3 +7,4 @@
 #define MAX_INIMIGOS_LINHA 5
 #define MAX_VIDAS 5
 #define VIDAS_INICIAIS 3
+#define MAX_ESPECIAIS 3

@@ -20,7 +20,7 @@ float formulaDistancia(float x1, float x2, float y1, float y2)
 
 int detectaColisao(tipoSprite s1, tipoSprite s2)
 {
-    double distancia = formulaDistancia(s1.posicao.x, s2.posicao.x, s1.posicao.y, s2.posicao.y);
+    float distancia = formulaDistancia(s1.posicao.x, s2.posicao.x, s1.posicao.y, s2.posicao.y);
     if (distancia <= s1.raio + s2.raio)
         return 1;
     return 0;

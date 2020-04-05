@@ -10,6 +10,7 @@
 #include "definicoes.h"
 
 enum estadosJogo {gameOver, ativo, pause, vitoria} JOGO;
+enum fases {primeira, segunda, terceira, chefao} FASES;
 enum itens {vida, velocidade, tiro} ITENS;
 
 GLuint idTexturaFundo;
@@ -23,9 +24,10 @@ tipoSprite iconeVidas[MAX_VIDAS];
 tipoSprite itemDrop;
 
 int VIDAS;
+int TIRO_ESPECIAL;
 int PONTOS;
+int QTD_ESPECIAIS;
 char STR_PONTOS[10];
-int TIRO_ESPECIAL = FALSE;
 
 void detectaItem()
 {
@@ -171,6 +173,30 @@ void movimentaInimigos()
     }
 }
 
+void desenhaItens()
+{
+    if (itemDrop.ativo) {
+        if (ITENS == vida)
+            desenhaSprite(idTexturaSheet, itemDrop, 0.217, 0.874, 0.021, 0.020);
+        else if (ITENS == velocidade)
+            desenhaSprite(idTexturaSheet, itemDrop, 0.790, 0.543, 0.018, 0.029);
+        else if (ITENS == tiro)
+            desenhaSprite(idTexturaSheet, itemDrop, 0.760, 0.426, 0.030, 0.029);
+    }
+}
+
+void desenhaInimigos()
+{
+    for (int i = 0; i < QTD_INIMIGOS; i++) {
+        if (vetorInimigos[i].ativo) {
+            if (vetorInimigos[i].especial)
+                desenhaSprite(idTexturaSheet, vetorInimigos[i], 0.117, 0.410, 0.101, 0.082);
+            else
+                desenhaSprite(idTexturaSheet, vetorInimigos[i], 0.413, 0.207, 0.090, 0.082);
+        }
+    }
+}
+
 void desenhaFase()
 {
     // desenha nave do jogador
@@ -185,20 +211,10 @@ void desenhaFase()
         desenhaSprite(idTexturaSheet, tiroInimigo, 0.835, 0.151, 0.008, 0.055);
 
     // desenha naves ativas dos inimigos
-    for (int i = 0; i < QTD_INIMIGOS; i++) {
-        if (vetorInimigos[i].ativo)
-            desenhaSprite(idTexturaSheet, vetorInimigos[i], 0.413, 0.207, 0.090, 0.082);
-    }
+    desenhaInimigos();
 
     // desenha itens de drop se ativos
-    if (itemDrop.ativo) {
-        if (ITENS == vida)
-            desenhaSprite(idTexturaSheet, itemDrop, 0.217, 0.874, 0.021, 0.020);
-        else if (ITENS == velocidade)
-            desenhaSprite(idTexturaSheet, itemDrop, 0.790, 0.543, 0.018, 0.029);
-        else if (ITENS == tiro)
-            desenhaSprite(idTexturaSheet, itemDrop, 0.760, 0.426, 0.030, 0.029);
-    }
+    desenhaItens();
 }
 
 void desenhaHud()
@@ -324,6 +340,7 @@ void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, f
     sprite->dimensoes.y = altura;
     sprite->raio = raio;
     sprite->ativo = TRUE;
+    sprite->especial = FALSE;
 }
 
 void inicializaHud()
@@ -361,19 +378,37 @@ void inicializaTiro(tipoSprite* tiro, float x, float y)
         tiro->velocidade = 2;
 }
 
+void inicializaEspeciais()
+{
+    for (int i = 0; i < MAX_ESPECIAIS; i++) {
+        int sorteio = rand() % QTD_INIMIGOS;
+        while (vetorInimigos[sorteio].especial)
+            sorteio = rand() % QTD_INIMIGOS;
+        vetorInimigos[sorteio].especial = TRUE;
+    }
+}
+
 void inicializaInimigos()
 {
     int x = -LARGURA_DO_MUNDO/2 + 20;
     int y = ALTURA_DO_MUNDO * 0.4;
+    int dx = 20;
+    int dy = 30;
     for (int i = 0; i < QTD_INIMIGOS; i++) {
         inicializaSprite(&vetorInimigos[i], x, y, 15, 15, 15/2);
         vetorInimigos[i].velocidade = 0.001;
-        x += 20;
+        x += dx;
         if ((i+1) % MAX_INIMIGOS_LINHA == 0) {
-            y -= 30;
-            x = -LARGURA_DO_MUNDO/2 + 20;
+            y -= dy;
+            x = -LARGURA_DO_MUNDO/2 + dx;
         }
     }
+
+    if (FASES == segunda)
+        inicializaEspeciais();
+
+    for (int i = 0; i < QTD_INIMIGOS; i++)
+        printf("%d\n", vetorInimigos[i].especial);
 }
 
 void inicializaJogador()
@@ -385,9 +420,11 @@ void inicializaJogador()
 void inicializaJogo()
 {
     JOGO = ativo;
+    FASES = primeira;
     PONTOS = 0;
     VIDAS = VIDAS_INICIAIS;
     TIRO_ESPECIAL = FALSE;
+    QTD_ESPECIAIS = 0;
     tiroInimigo.ativo = FALSE;
     tiroJogador.ativo = FALSE;
     itemDrop.ativo = FALSE;
