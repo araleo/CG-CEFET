@@ -46,12 +46,17 @@ void detectaItem()
 
 void sorteiaItem(tipoSprite inimigo)
 {
-    int sorteio = rand() % 6;
-    if (sorteio < 3) {
-        ITENS = sorteio;
+    if (inimigo.especial && rand() % 2 == 0) {
+        ITENS = tiro;
         inicializaItem(&itemDrop, inimigo.posicao.x, inimigo.posicao.y);
-        glutPostRedisplay();
+    } else if (!inimigo.especial){
+        int sorteio = rand() % 6;
+        if (sorteio < 2) {
+            ITENS = sorteio;
+            inicializaItem(&itemDrop, inimigo.posicao.x, inimigo.posicao.y);
+        }
     }
+    glutPostRedisplay();
 }
 
 void inimigoAtira()
@@ -265,12 +270,26 @@ void desenharMinhaCena()
     glutSwapBuffers();
 }
 
+void proximaFase()
+{
+    FASES += 1;
+    tiroInimigo.ativo = FALSE;
+    tiroJogador.ativo = FALSE;
+    itemDrop.ativo = FALSE;
+    inicializaInimigos();
+    glutPostRedisplay();
+}
+
 int verificaVitoria()
 {
     for (int i = 0; i < QTD_INIMIGOS; i++)
         if (vetorInimigos[i].ativo)
             return 0;
-    JOGO = vitoria;
+
+    if (FASES < segunda)
+        proximaFase();
+    else if (FASES == segunda)
+        JOGO = vitoria;
 }
 
 void verificaGameOver()
@@ -406,9 +425,6 @@ void inicializaInimigos()
 
     if (FASES == segunda)
         inicializaEspeciais();
-
-    for (int i = 0; i < QTD_INIMIGOS; i++)
-        printf("%d\n", vetorInimigos[i].especial);
 }
 
 void inicializaJogador()
