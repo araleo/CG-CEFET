@@ -16,15 +16,16 @@ enum itens {vida, velocidade, tiro} ITENS;
 GLuint idTexturaFundo;
 GLuint idTexturaSheet;
 
-tipoSprite jogador;
+tipoJogador jogador;
+tipoInimigo vetorInimigos[QTD_INIMIGOS];
+
 tipoSprite tiroJogador;
 tipoSprite tiroInimigo;
 tipoSprite tiroInimigoEspecial;
-tipoSprite vetorInimigos[QTD_INIMIGOS];
+
 tipoSprite iconeVidas[MAX_VIDAS];
 tipoSprite itemDrop;
 
-int VIDAS;
 int TIRO_ESPECIAL;
 int PONTOS;
 int QTD_ESPECIAIS;
@@ -32,29 +33,29 @@ char STR_PONTOS[10];
 
 void detectaItem()
 {
-    if (detectaColisao(jogador, itemDrop)) {
+    if (detectaColisao(jogador.sprite, itemDrop)) {
         itemDrop.ativo = FALSE;
         PONTOS += 10;
 
-        if (ITENS == vida && VIDAS < 5)
-            VIDAS += 1;
-        else if (ITENS == velocidade && jogador.velocidade < 5)
-            jogador.velocidade += 1;
+        if (ITENS == vida && jogador.vidas < 5)
+            jogador.vidas += 1;
+        else if (ITENS == velocidade && jogador.sprite.velocidade < 5)
+            jogador.sprite.velocidade += 1;
         else if (ITENS == tiro)
             TIRO_ESPECIAL = TRUE;
     }
 }
 
-void sorteiaItem(tipoSprite inimigo)
+void sorteiaItem(tipoInimigo inimigo)
 {
     if (inimigo.especial && rand() % 2 == 0) {
         ITENS = tiro;
-        inicializaItem(&itemDrop, inimigo.posicao.x, inimigo.posicao.y);
+        inicializaItem(&itemDrop, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
     } else if (!inimigo.especial){
         int sorteio = rand() % 6;
         if (sorteio < 2) {
             ITENS = sorteio;
-            inicializaItem(&itemDrop, inimigo.posicao.x, inimigo.posicao.y);
+            inicializaItem(&itemDrop, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
         }
     }
     glutPostRedisplay();
@@ -64,34 +65,33 @@ void inimigoAtira()
 {
     int sorteiaInimigo = rand() % QTD_INIMIGOS;
 
-    if (vetorInimigos[sorteiaInimigo].especial && vetorInimigos[sorteiaInimigo].ativo && !tiroInimigoEspecial.ativo) {
-        inicializaTiro(&tiroInimigoEspecial, vetorInimigos[sorteiaInimigo].posicao.x, vetorInimigos[sorteiaInimigo].posicao.y);
+    if (vetorInimigos[sorteiaInimigo].especial && vetorInimigos[sorteiaInimigo].sprite.ativo && !tiroInimigoEspecial.ativo) {
+        inicializaTiro(&tiroInimigoEspecial, vetorInimigos[sorteiaInimigo].sprite.posicao.x, vetorInimigos[sorteiaInimigo].sprite.posicao.y);
     } else {
         int sorteiaTiro = rand() % 32000;
-        if (sorteiaTiro == 0 && !tiroInimigo.ativo && vetorInimigos[sorteiaInimigo].ativo)
-            inicializaTiro(&tiroInimigo, vetorInimigos[sorteiaInimigo].posicao.x, vetorInimigos[sorteiaInimigo].posicao.y);
+        if (sorteiaTiro == 0 && !tiroInimigo.ativo && vetorInimigos[sorteiaInimigo].sprite.ativo)
+            inicializaTiro(&tiroInimigo, vetorInimigos[sorteiaInimigo].sprite.posicao.x, vetorInimigos[sorteiaInimigo].sprite.posicao.y);
     }
 }
 
 void detectaTiro(tipoSprite* tiro)
 {
-    tipoSprite* alvo = NULL;
 
     if ((tiro == &tiroInimigo || tiro == &tiroInimigoEspecial) && tiro->ativo) {
-        alvo = &jogador;
-        if (detectaColisao(*alvo, *tiro)) {
+        tipoJogador* alvo = &jogador;
+        if (detectaColisao(alvo->sprite, *tiro)) {
             tiro->ativo = FALSE;
-            VIDAS -= 1;
+            jogador.vidas -= 1;
             PONTOS -= 10;
             verificaGameOver();
         }
     } else if (tiro == &tiroJogador && tiro->ativo) {
         for (int i = 0; i < QTD_INIMIGOS; i++) {
-            alvo = &vetorInimigos[i];
-            if (alvo->ativo && detectaColisao(*alvo, *tiro)) {
+            tipoInimigo* alvo = &vetorInimigos[i];
+            if (alvo->sprite.ativo && detectaColisao(alvo->sprite, *tiro)) {
                 tiro->ativo = FALSE;
-                alvo->ativo = FALSE;
-                PONTOS += ((-alvo->posicao.y + 150) / 10) + 10;
+                alvo->sprite.ativo = FALSE;
+                PONTOS += ((-alvo->sprite.posicao.y + 150) / 10) + 10;
                 if (alvo->especial)
                     PONTOS += 20;
 
@@ -125,7 +125,7 @@ void movimentaProps()
     }
 
     // movimenta os tiros do jogador
-    if (tiroJogador.posicao.y > ALTURA_DO_MUNDO/2 || tiroJogador.posicao.y > vetorInimigos[0].posicao.y + 30)
+    if (tiroJogador.posicao.y > ALTURA_DO_MUNDO/2 || tiroJogador.posicao.y > vetorInimigos[0].sprite.posicao.y + 30)
         tiroJogador.ativo = FALSE;
 
     if (JOGO == ativo && tiroJogador.ativo) {
@@ -149,7 +149,7 @@ void movimentaProps()
 void jogadorAtira()
 {
     if (JOGO == ativo && !tiroJogador.ativo) {
-        inicializaTiro(&tiroJogador, jogador.posicao.x, jogador.posicao.y + jogador.dimensoes.y/2);
+        inicializaTiro(&tiroJogador, jogador.sprite.posicao.x, jogador.sprite.posicao.y + jogador.sprite.dimensoes.y/2);
         desenhaSprite(idTexturaSheet, tiroJogador, 0.833, 0.339, 0.008, 0.036);
         // glutPostRedisplay();
     }
@@ -158,12 +158,12 @@ void jogadorAtira()
 void movimentaJogador(char lado)
 {
     if (lado == 'e') {
-        if (JOGO == ativo && jogador.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.dimensoes.x/2) {
-            jogador.posicao.x -= jogador.velocidade;
+        if (JOGO == ativo && jogador.sprite.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.sprite.dimensoes.x/2) {
+            jogador.sprite.posicao.x -= jogador.sprite.velocidade;
         }
     } else if (lado == 'd') {
-        if (JOGO == ativo && jogador.posicao.x < LARGURA_DO_MUNDO/2 - jogador.dimensoes.x/2) {
-            jogador.posicao.x += jogador.velocidade;
+        if (JOGO == ativo && jogador.sprite.posicao.x < LARGURA_DO_MUNDO/2 - jogador.sprite.dimensoes.x/2) {
+            jogador.sprite.posicao.x += jogador.sprite.velocidade;
         }
     }
     // glutPostRedisplay();
@@ -173,21 +173,21 @@ void movimentaInimigos()
 {
     if (JOGO == ativo) {
         for (int i = 0; i < QTD_INIMIGOS; i++) {
-            if (vetorInimigos[i].ativo) {
-                if (vetorInimigos[i].posicao.y <= jogador.posicao.y + jogador.dimensoes.y) {
+            if (vetorInimigos[i].sprite.ativo) {
+                if (vetorInimigos[i].sprite.posicao.y <= jogador.sprite.posicao.y + jogador.sprite.dimensoes.y) {
                     // jogador perdeu - um inimigo chegou no "chão"
                     JOGO = gameOver;
-                } else if (vetorInimigos[i].posicao.x <= -LARGURA_DO_MUNDO/2 + vetorInimigos[i].dimensoes.x/2
-                          || vetorInimigos[i].posicao.x >= LARGURA_DO_MUNDO/2 - vetorInimigos[i].dimensoes.x/2) {
+                } else if (vetorInimigos[i].sprite.posicao.x <= -LARGURA_DO_MUNDO/2 + vetorInimigos[i].sprite.dimensoes.x/2
+                          || vetorInimigos[i].sprite.posicao.x >= LARGURA_DO_MUNDO/2 - vetorInimigos[i].sprite.dimensoes.x/2) {
                     // move verticalmente e altera a direção
                     for (int j = 0; j < QTD_INIMIGOS; j++) {
-                        vetorInimigos[j].posicao.y -= 20;
-                        vetorInimigos[j].velocidade *= -1;
-                        vetorInimigos[j].posicao.x += vetorInimigos[j].velocidade;
+                        vetorInimigos[j].sprite.posicao.y -= 20;
+                        vetorInimigos[j].sprite.velocidade *= -1;
+                        vetorInimigos[j].sprite.posicao.x += vetorInimigos[j].sprite.velocidade;
                     }
                 } else {
                     // move horizontalmente
-                    vetorInimigos[i].posicao.x += vetorInimigos[i].velocidade;
+                    vetorInimigos[i].sprite.posicao.x += vetorInimigos[i].sprite.velocidade;
                     inimigoAtira();
                 }
             }
@@ -212,11 +212,11 @@ void desenhaItens()
 void desenhaInimigos()
 {
     for (int i = 0; i < QTD_INIMIGOS; i++) {
-        if (vetorInimigos[i].ativo) {
+        if (vetorInimigos[i].sprite.ativo) {
             if (vetorInimigos[i].especial)
-                desenhaSprite(idTexturaSheet, vetorInimigos[i], 0.140, 0.631, 0.101, 0.082);
+                desenhaSprite(idTexturaSheet, vetorInimigos[i].sprite, 0.140, 0.631, 0.101, 0.082);
             else
-                desenhaSprite(idTexturaSheet, vetorInimigos[i], 0.413, 0.207, 0.090, 0.082);
+                desenhaSprite(idTexturaSheet, vetorInimigos[i].sprite, 0.413, 0.207, 0.090, 0.082);
         }
     }
 }
@@ -224,7 +224,7 @@ void desenhaInimigos()
 void desenhaFase()
 {
     // desenha nave do jogador
-    desenhaSprite(idTexturaSheet, jogador, 0.000, 0.007, 0.109, 0.073);
+    desenhaSprite(idTexturaSheet, jogador.sprite, 0.000, 0.007, 0.109, 0.073);
 
     // desenha tiro do jogador se ativo
     if (tiroJogador.ativo) {
@@ -267,7 +267,7 @@ void desenhaHud()
     escreveTexto(GLUT_BITMAP_HELVETICA_18, STR_PONTOS, LARGURA_DO_MUNDO/2 - 20, -ALTURA_DO_MUNDO/2 + 2);
 
     // desenha vidas
-    for (int i = 0; i < VIDAS; i++)
+    for (int i = 0; i < jogador.vidas; i++)
         desenhaSprite(idTexturaSheet, iconeVidas[i], 0.490, 0.006, 0.036, 0.025);
 }
 
@@ -311,7 +311,7 @@ void proximaFase()
 int verificaVitoria()
 {
     for (int i = 0; i < QTD_INIMIGOS; i++)
-        if (vetorInimigos[i].ativo)
+        if (vetorInimigos[i].sprite.ativo)
             return 0;
 
     if (FASES < terceira)
@@ -322,8 +322,8 @@ int verificaVitoria()
 
 void verificaGameOver()
 {
-    if (VIDAS == 0) {
-        jogador.ativo = FALSE;
+    if (jogador.vidas == 0) {
+        jogador.sprite.ativo = FALSE;
         JOGO = gameOver;
     }
 }
@@ -387,7 +387,6 @@ void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, f
     sprite->dimensoes.y = altura;
     sprite->raio = raio;
     sprite->ativo = TRUE;
-    sprite->especial = FALSE;
 }
 
 void inicializaHud()
@@ -399,7 +398,7 @@ void inicializaHud()
     for (int i = 0; i < MAX_VIDAS; i++) {
         inicializaSprite(&iconeVidas[i], x, y, 5, 5, 5);
         x += distancia;
-        if(i >= VIDAS)
+        if(i >= jogador.vidas)
             iconeVidas[i].ativo = FALSE;
     }
 }
@@ -448,8 +447,9 @@ void inicializaInimigos()
     int dx = 20;
     int dy = 30;
     for (int i = 0; i < QTD_INIMIGOS; i++) {
-        inicializaSprite(&vetorInimigos[i], x, y, 15, 15, 15/2);
-        vetorInimigos[i].velocidade = 0.001;
+        inicializaSprite(&vetorInimigos[i].sprite, x, y, 15, 15, 15/2);
+        vetorInimigos[i].sprite.velocidade = 0.001;
+        vetorInimigos[i].especial = FALSE;
         x += dx;
         if ((i+1) % MAX_INIMIGOS_LINHA == 0) {
             y -= dy;
@@ -463,8 +463,8 @@ void inicializaInimigos()
 
 void inicializaJogador()
 {
-    inicializaSprite(&jogador, 0, -ALTURA_DO_MUNDO * 0.4, 20, 20, 20/2);
-    jogador.velocidade = 2;
+    inicializaSprite(&jogador.sprite, 0, -ALTURA_DO_MUNDO * 0.4, 20, 20, 20/2);
+    jogador.sprite.velocidade = 2;
 }
 
 void inicializaJogo()
@@ -472,9 +472,9 @@ void inicializaJogo()
     JOGO = ativo;
     FASES = primeira;
     PONTOS = 0;
-    VIDAS = VIDAS_INICIAIS;
     TIRO_ESPECIAL = FALSE;
     QTD_ESPECIAIS = 0;
+    jogador.vidas = VIDAS_INICIAIS;
     tiroInimigo.ativo = FALSE;
     tiroInimigoEspecial.ativo = FALSE;
     tiroJogador.ativo = FALSE;

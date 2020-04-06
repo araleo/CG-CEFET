@@ -10,5 +10,16 @@ typedef struct spriteStruct
     float raio;
     float velocidade;
     int ativo;
-    int especial;
 } tipoSprite;
+
+typedef struct jogadorStruct
+{
+    tipoSprite sprite;
+    int vidas;
+} tipoJogador;
+
+typedef struct inimigoStruct
+{
+    tipoSprite sprite;
+    int especial;
+} tipoInimigo;
