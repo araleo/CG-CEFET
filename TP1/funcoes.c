@@ -11,6 +11,14 @@
 #define min(x,y) ((x) < (y) ? (x) : (y))
 #define max(x,y) ((x) > (y) ? (x) : (y))
 
+
+tipoVetor2d formulaBezier(tipoVetor2d p0, tipoVetor2d p1, tipoVetor2d p2, tipoVetor2d pFinal, float t)
+{
+    pFinal.x = pow(1 - t, 2) * p0.x + (1 - t) * 2 * t * p1.x + t * t * p2.x;
+    pFinal.y = pow(1 - t, 2) * p0.y + (1 - t) * 2 * t * p1.y + t * t * p2.y;
+    return pFinal;
+}
+
 float formulaDistancia(float x1, float x2, float y1, float y2)
 {
     float x = max(x1, x2) - min(x1, x2);
