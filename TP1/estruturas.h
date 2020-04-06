@@ -22,6 +22,6 @@ typedef struct inimigoStruct
 {
     tipoSprite sprite;
     int especial;
-    int chefao;
     int vidas;
+    int rasante;
 } tipoInimigo;

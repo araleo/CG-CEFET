@@ -30,6 +30,43 @@ int TIRO_ESPECIAL;
 int PONTOS;
 char STR_PONTOS[10];
 
+float T = 0;
+
+void curvaBezier()
+{
+    if (T <= 1) {
+        tipoVetor2d p0;
+        tipoVetor2d p1;
+        tipoVetor2d p2;
+        tipoVetor2d pFinal;
+
+        p0.x = chefao.sprite.posicao.x;
+        p0.y = chefao.sprite.posicao.y;
+
+        p1.x = 90;
+        p1.y = 0;
+
+        p2.x = 10;
+        p2.y = -150;
+
+        pFinal = formulaBezier(p0, p1, p2, pFinal, T);
+        chefao.sprite.posicao.x = pFinal.x;
+        chefao.sprite.posicao.y = pFinal.y;
+
+        T += 0.01;
+    }
+}
+
+void ativaCurva()
+{
+    if (chefao.rasante)
+        curvaBezier();
+    glutPostRedisplay();
+    glutTimerFunc(33, ativaCurva, 0);
+}
+
+
+
 void detectaItem()
 {
     if (detectaColisao(jogador.sprite, itemDrop)) {
@@ -103,6 +140,7 @@ void detectaTiro(tipoSprite* tiro)
         } else {
             tipoInimigo* alvo = &chefao;
             if (alvo->sprite.ativo && detectaColisao(alvo->sprite, *tiro)) {
+                chefao.rasante = TRUE;
                 tiro->ativo = FALSE;
                 PONTOS += 10;
                 alvo->vidas -= 1;
@@ -455,6 +493,7 @@ void inicializaChefao()
     inicializaSprite(&chefao.sprite, 0, ALTURA_DO_MUNDO * 0.4, 40, 40, 40/2);
     chefao.sprite.velocidade = 1;
     chefao.vidas = 5;
+    chefao.rasante = FALSE;
 }
 
 void inicializaEspeciais()
@@ -480,6 +519,7 @@ void inicializaInimigos()
             vetorInimigos[i].sprite.velocidade = 0.001;
             vetorInimigos[i].vidas = 1;
             vetorInimigos[i].especial = FALSE;
+            vetorInimigos[i].rasante = FALSE;
             x += dx;
             if ((i+1) % MAX_INIMIGOS_LINHA == 0) {
                 y -= dy;
@@ -505,7 +545,7 @@ void inicializaJogador()
 void inicializaJogo()
 {
     JOGO = ativo;
-    FASES = primeira;
+    FASES = chefe;
     PONTOS = 0;
     TIRO_ESPECIAL = FALSE;
     QTD_ESPECIAIS = 0;
@@ -565,6 +605,7 @@ int main(int argc, char** argv)
 
     glutTimerFunc(0, movimentaInimigos, 0);
     glutTimerFunc(0, movimentaProps, 0);
+    glutTimerFunc(0, ativaCurva, 0);
 
     // configura variaveis do glut
     inicializa();
