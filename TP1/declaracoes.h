@@ -12,3 +12,6 @@ void desenhaHud();
 void inicializaItem(tipoSprite* item, float x, float y);
 void inicializaInimigos();
 tipoVetor2d formulaBezier(tipoVetor2d p0, tipoVetor2d p1, tipoVetor2d p2, tipoVetor2d pFinal, float t);
+void inicializaChefao();
+void movimentaInimigos();
+void movimentaProps();

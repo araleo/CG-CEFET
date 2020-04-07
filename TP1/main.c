@@ -32,9 +32,13 @@ char STR_PONTOS[10];
 
 float T = 0;
 
-void curvaBezier()
+long int fps = 0;
+long int inicio;
+long int fim;
+
+void curvaBezier(tipoInimigo inimigo)
 {
-    if (T <= 1) {
+    if (T < 1) {
         tipoVetor2d p0;
         tipoVetor2d p1;
         tipoVetor2d p2;
@@ -54,17 +58,31 @@ void curvaBezier()
         chefao.sprite.posicao.y = pFinal.y;
 
         T += 0.01;
+    } else if (T >= 1) {
+        T = 0;
     }
 }
 
 void ativaCurva()
 {
     if (chefao.rasante)
-        curvaBezier();
-    glutPostRedisplay();
-    glutTimerFunc(33, ativaCurva, 0);
+        curvaBezier(chefao);
+    // for (int i = 0; i < QTD_INIMIGOS; i++) {
+    //     if (vetorInimigos[i].rasante || chefao.rasante)
+    //         curvaBezier(chefao);
+    // }
+    // glutPostRedisplay();
 }
 
+
+void movimentos()
+{
+    movimentaInimigos();
+    movimentaProps();
+    ativaCurva();
+    glutPostRedisplay();
+    glutTimerFunc(16, movimentos, 0);
+}
 
 
 void detectaItem()
@@ -94,7 +112,7 @@ void sorteiaItem(tipoInimigo inimigo)
             inicializaItem(&itemDrop, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
         }
     }
-    glutPostRedisplay();
+    // glutPostRedisplay();
 }
 
 void inimigoAtira()
@@ -120,7 +138,6 @@ void detectaTiro(tipoSprite* tiro)
             verificaGameOver();
         }
     } else if (tiro == &tiroJogador && tiro->ativo) {
-
         if (FASES < chefe) {
             for (int i = 0; i < QTD_INIMIGOS; i++) {
                 tipoInimigo* alvo = &vetorInimigos[i];
@@ -130,7 +147,6 @@ void detectaTiro(tipoSprite* tiro)
                     PONTOS += ((-alvo->sprite.posicao.y + 150) / 10) + 10;
                     if (alvo->especial)
                         PONTOS += 20;
-
                     if (!verificaVitoria()) {
                         if (!itemDrop.ativo)
                             sorteiaItem(*alvo);
@@ -196,7 +212,6 @@ void movimentaProps()
     }
 
     // glutPostRedisplay();
-    glutTimerFunc(33, movimentaProps, 0);
 }
 
 void jogadorAtira()
@@ -244,9 +259,8 @@ void movimentaInimigos()
                     inimigoAtira();
                 }
             }
+            // glutPostRedisplay();
         }
-        glutPostRedisplay();
-        glutTimerFunc(33, movimentaInimigos, 0);
     }
 }
 
@@ -320,7 +334,7 @@ void desenhaHud()
 
     // mostra os pontos do jogador
     glColor4f(1, 1, 1, 1);
-    snprintf(STR_PONTOS, 10, "%d", PONTOS);
+    snprintf(STR_PONTOS, 10, "%d", PONTOS); // converte int para string
     escreveTexto(GLUT_BITMAP_HELVETICA_18, "PONTOS: ", LARGURA_DO_MUNDO/2 - 45, -ALTURA_DO_MUNDO/2 + 2);
     escreveTexto(GLUT_BITMAP_HELVETICA_18, STR_PONTOS, LARGURA_DO_MUNDO/2 - 20, -ALTURA_DO_MUNDO/2 + 2);
 
@@ -340,7 +354,7 @@ void desenharMinhaCena()
     desenhaHud();
 
     if (JOGO == ativo) {
-        movimentaInimigos();
+        // movimentos();
     } else if (JOGO == pause) {
         glColor3f(1, 0, 0);
         escreveTexto(GLUT_BITMAP_HELVETICA_18, "JOGO PAUSADO", -20, 0);
@@ -353,6 +367,14 @@ void desenharMinhaCena()
     }
 
     glutSwapBuffers();
+
+    fps++;
+    fim = time(NULL);
+    if (fim - inicio > 0) {
+        printf("fps: %ld\n", fps/(fim - inicio));
+        fps = 0;
+        inicio = fim;
+    }
 }
 
 void proximaFase()
@@ -464,14 +486,14 @@ void inicializaHud()
 void inicializaItem(tipoSprite* item, float x, float y)
 {
     inicializaSprite(item, x, y, 8, 8, 4);
-    item->velocidade = 2;
+    item->velocidade = 1;
 }
 
 void inicializaTiro(tipoSprite* tiro, float x, float y)
 {
     inicializaSprite(tiro, x, y, 1, 5, 1);
     if (tiro == &tiroJogador) {
-        tiro->velocidade = 4;
+        tiro->velocidade = 2;
         if (TIRO_ESPECIAL) {
             tiro->dimensoes.x = 2;
             tiro->dimensoes.y = 10;
@@ -482,9 +504,9 @@ void inicializaTiro(tipoSprite* tiro, float x, float y)
         tiro->dimensoes.x = 2;
         tiro->dimensoes.y = 10;
         tiro->raio = 3;
-        tiro->velocidade = 3;
-    } else {
         tiro->velocidade = 2;
+    } else {
+        tiro->velocidade = 1;
     }
 }
 
@@ -516,7 +538,7 @@ void inicializaInimigos()
         int dy = 30;
         for (int i = 0; i < QTD_INIMIGOS; i++) {
             inicializaSprite(&vetorInimigos[i].sprite, x, y, 15, 15, 15/2);
-            vetorInimigos[i].sprite.velocidade = 0.001;
+            vetorInimigos[i].sprite.velocidade = 0.5;
             vetorInimigos[i].vidas = 1;
             vetorInimigos[i].especial = FALSE;
             vetorInimigos[i].rasante = FALSE;
@@ -545,7 +567,7 @@ void inicializaJogador()
 void inicializaJogo()
 {
     JOGO = ativo;
-    FASES = chefe;
+    FASES = primeira;
     PONTOS = 0;
     TIRO_ESPECIAL = FALSE;
     QTD_ESPECIAIS = 0;
@@ -585,6 +607,8 @@ void inicializa()
 
 int main(int argc, char** argv)
 {
+    inicio = time(NULL);
+
     // inicializa gerador de números aleatórios
     srand(time(0));
 
@@ -603,9 +627,7 @@ int main(int argc, char** argv)
     glutKeyboardFunc(teclaPressionada);
     glutSpecialFunc(teclasEspeciais);
 
-    glutTimerFunc(0, movimentaInimigos, 0);
-    glutTimerFunc(0, movimentaProps, 0);
-    glutTimerFunc(0, ativaCurva, 0);
+    glutTimerFunc(16, movimentos, 0);
 
     // configura variaveis do glut
     inicializa();
