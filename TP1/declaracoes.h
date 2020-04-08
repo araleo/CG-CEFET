@@ -15,3 +15,4 @@ tipoVetor2d formulaBezier(tipoVetor2d p0, tipoVetor2d p1, tipoVetor2d p2, tipoVe
 void inicializaChefao();
 void movimentaInimigos();
 void movimentaProps();
+int aleatorioEntre(int x, int y);

@@ -32,38 +32,59 @@ char STR_PONTOS[10];
 
 float T = 0;
 
+tipoVetor2d pontosCurva[3];
 
-void curvaBezier(tipoInimigo inimigo)
+void atualizaPontosCurva(tipoInimigo* inimigo)
+{
+    pontosCurva[0].x = aleatorioEntre(0, LARGURA_DO_MUNDO);
+    pontosCurva[0].y = aleatorioEntre(inimigo->sprite.posicao.y, jogador.sprite.posicao.y);
+
+    pontosCurva[1].x = aleatorioEntre(0, LARGURA_DO_MUNDO);
+    pontosCurva[1].y = -aleatorioEntre(30, 40);
+
+    pontosCurva[2].x = aleatorioEntre(0, LARGURA_DO_MUNDO);
+    pontosCurva[2].y = aleatorioEntre(inimigo->sprite.posicao.y, ALTURA_DO_MUNDO);
+}
+
+void curvaBezier(tipoInimigo* inimigo)
 {
     if (T < 1) {
-        tipoVetor2d p0;
-        tipoVetor2d p1;
-        tipoVetor2d p2;
+        tipoVetor2d pontos[6];
         tipoVetor2d pFinal;
 
-        p0.x = inimigo.sprite.posicao.x;
-        p0.y = inimigo.sprite.posicao.y;
+        pontos[0].x = inimigo->sprite.posicao.x;
+        pontos[0].y = inimigo->sprite.posicao.y;
 
-        p1.x = rand() % LARGURA_DO_MUNDO - LARGURA_DO_MUNDO/2;
-        p1.y = 0;
+        pontos[1].x = pontosCurva[0].x;
+        pontos[1].y = pontosCurva[0].y;
 
-        p2.x = 10;
-        p2.y = -150;
+        pontos[2].x = pontosCurva[1].x;
+        pontos[2].y = pontosCurva[1].y;
 
-        pFinal = formulaBezier(p0, p1, p2, pFinal, T);
-        chefao.sprite.posicao.x = pFinal.x;
-        chefao.sprite.posicao.y = pFinal.y;
+        pontos[3].x = pontos[2].x;
+        pontos[3].y = -pontos[2].y;
+
+        pontos[4].x = pontosCurva[2].x;
+        pontos[4].y = pontosCurva[2].y;
+
+        pontos[5].x = pontos[0].x;
+        pontos[5].y = pontos[0].y;
+
+        pFinal = formulaBezier(pontos[0], pontos[1], pontos[2], pFinal, T);
+        inimigo->sprite.posicao.x = pFinal.x;
+        inimigo->sprite.posicao.y = pFinal.y;
 
         T += 0.01;
     } else if (T >= 1) {
-        T = 0;
+        // T = 0;
     }
 }
 
 void ativaCurva()
 {
     if (chefao.rasante)
-        curvaBezier(chefao);
+        curvaBezier(&chefao);
+
     // for (int i = 0; i < QTD_INIMIGOS; i++) {
     //     if (vetorInimigos[i].rasante || chefao.rasante)
     //         curvaBezier(chefao);
@@ -156,6 +177,7 @@ void detectaTiro(tipoSprite* tiro)
             tipoInimigo* alvo = &chefao;
             if (alvo->sprite.ativo && detectaColisao(alvo->sprite, *tiro)) {
                 chefao.rasante = TRUE;
+                atualizaPontosCurva(&chefao);
                 tiro->ativo = FALSE;
                 PONTOS += 10;
                 alvo->vidas -= 1;

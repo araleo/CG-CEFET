@@ -13,10 +13,9 @@
 
 int aleatorioEntre(int x, int y)
 {
-
-
-
-
+    int maior = max(x, y);
+    int menor = min(x, y);
+    return (rand() % (maior - menor)) + menor;
 }
 
 tipoVetor2d formulaBezier(tipoVetor2d p0, tipoVetor2d p1, tipoVetor2d p2, tipoVetor2d pFinal, float t)
