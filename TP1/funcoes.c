@@ -11,6 +11,13 @@
 #define min(x,y) ((x) < (y) ? (x) : (y))
 #define max(x,y) ((x) > (y) ? (x) : (y))
 
+int aleatorioEntre(int x, int y)
+{
+
+
+
+
+}
 
 tipoVetor2d formulaBezier(tipoVetor2d p0, tipoVetor2d p1, tipoVetor2d p2, tipoVetor2d pFinal, float t)
 {
@@ -62,16 +69,16 @@ void desenhaFundoJogo(GLuint textura)
     glBindTexture(GL_TEXTURE_2D, textura);
     glBegin(GL_TRIANGLE_FAN);
         glTexCoord2f(0, 0);
-        glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 0);
+        glVertex3f(0, 0, 0);
 
         glTexCoord2f(1, 0);
-        glVertex3f(LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 0);
+        glVertex3f(LARGURA_DO_MUNDO, 0, 0);
 
         glTexCoord2f(1, 1);
-        glVertex3f(LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, 0);
+        glVertex3f(LARGURA_DO_MUNDO, ALTURA_DO_MUNDO, 0);
 
         glTexCoord2f(0, 1);
-        glVertex3f(-LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, 0);
+        glVertex3f(0, ALTURA_DO_MUNDO, 0);
     glEnd();
     glDisable(GL_TEXTURE_2D);
 }

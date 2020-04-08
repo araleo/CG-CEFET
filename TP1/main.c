@@ -32,9 +32,6 @@ char STR_PONTOS[10];
 
 float T = 0;
 
-long int fps = 0;
-long int inicio;
-long int fim;
 
 void curvaBezier(tipoInimigo inimigo)
 {
@@ -44,10 +41,10 @@ void curvaBezier(tipoInimigo inimigo)
         tipoVetor2d p2;
         tipoVetor2d pFinal;
 
-        p0.x = chefao.sprite.posicao.x;
-        p0.y = chefao.sprite.posicao.y;
+        p0.x = inimigo.sprite.posicao.x;
+        p0.y = inimigo.sprite.posicao.y;
 
-        p1.x = 90;
+        p1.x = rand() % LARGURA_DO_MUNDO - LARGURA_DO_MUNDO/2;
         p1.y = 0;
 
         p2.x = 10;
@@ -121,8 +118,7 @@ void inimigoAtira()
     if (inimigo.especial && inimigo.sprite.ativo && !tiroInimigoEspecial.ativo) {
         inicializaTiro(&tiroInimigoEspecial, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
     } else {
-        int sorteiaTiro = rand() % 32000;
-        if (sorteiaTiro == 0 && !tiroInimigo.ativo && inimigo.sprite.ativo)
+        if (!tiroInimigo.ativo && inimigo.sprite.ativo)
             inicializaTiro(&tiroInimigo, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
     }
 }
@@ -130,6 +126,7 @@ void inimigoAtira()
 void detectaTiro(tipoSprite* tiro)
 {
     if ((tiro == &tiroInimigo || tiro == &tiroInimigoEspecial) && tiro->ativo) {
+        // tido do jogador
         tipoJogador* alvo = &jogador;
         if (detectaColisao(alvo->sprite, *tiro)) {
             tiro->ativo = FALSE;
@@ -139,6 +136,7 @@ void detectaTiro(tipoSprite* tiro)
         }
     } else if (tiro == &tiroJogador && tiro->ativo) {
         if (FASES < chefe) {
+            // tiro dos inimigos
             for (int i = 0; i < QTD_INIMIGOS; i++) {
                 tipoInimigo* alvo = &vetorInimigos[i];
                 if (alvo->sprite.ativo && detectaColisao(alvo->sprite, *tiro)) {
@@ -154,6 +152,7 @@ void detectaTiro(tipoSprite* tiro)
                 }
             }
         } else {
+            // tiro do chefao
             tipoInimigo* alvo = &chefao;
             if (alvo->sprite.ativo && detectaColisao(alvo->sprite, *tiro)) {
                 chefao.rasante = TRUE;
@@ -173,7 +172,7 @@ void detectaTiro(tipoSprite* tiro)
 void movimentaProps()
 {
     // movimenta os tiros dos inimigos
-    if (tiroInimigo.posicao.y < -ALTURA_DO_MUNDO/2)
+    if (tiroInimigo.posicao.y < 0)
         tiroInimigo.ativo = FALSE;
 
     if (JOGO == ativo && tiroInimigo.ativo) {
@@ -182,7 +181,7 @@ void movimentaProps()
     }
 
     // movimenta os tiros dos inimigos especiais
-    if (tiroInimigoEspecial.posicao.y < -ALTURA_DO_MUNDO/2)
+    if (tiroInimigoEspecial.posicao.y < 0)
         tiroInimigoEspecial.ativo = FALSE;
 
     if (JOGO == ativo && tiroInimigoEspecial.ativo) {
@@ -191,7 +190,7 @@ void movimentaProps()
     }
 
     // movimenta os tiros do jogador
-    if (tiroJogador.posicao.y > ALTURA_DO_MUNDO/2)
+    if (tiroJogador.posicao.y > ALTURA_DO_MUNDO)
         tiroJogador.ativo = FALSE;
 
     if (FASES < chefe && tiroJogador.posicao.y > vetorInimigos[0].sprite.posicao.y + 30)
@@ -203,7 +202,7 @@ void movimentaProps()
     }
 
     // movimenta os itens
-    if (itemDrop.posicao.y < -ALTURA_DO_MUNDO/2)
+    if (itemDrop.posicao.y < 0)
         itemDrop.ativo = FALSE;
 
     if (JOGO == ativo && itemDrop.ativo) {
@@ -226,11 +225,11 @@ void jogadorAtira()
 void movimentaJogador(char lado)
 {
     if (lado == 'e') {
-        if (JOGO == ativo && jogador.sprite.posicao.x > -LARGURA_DO_MUNDO/2 + jogador.sprite.dimensoes.x/2) {
+        if (JOGO == ativo && jogador.sprite.posicao.x > jogador.sprite.dimensoes.x/2) {
             jogador.sprite.posicao.x -= jogador.sprite.velocidade;
         }
     } else if (lado == 'd') {
-        if (JOGO == ativo && jogador.sprite.posicao.x < LARGURA_DO_MUNDO/2 - jogador.sprite.dimensoes.x/2) {
+        if (JOGO == ativo && jogador.sprite.posicao.x < LARGURA_DO_MUNDO - jogador.sprite.dimensoes.x/2) {
             jogador.sprite.posicao.x += jogador.sprite.velocidade;
         }
     }
@@ -245,8 +244,8 @@ void movimentaInimigos()
                 if (vetorInimigos[i].sprite.posicao.y <= jogador.sprite.posicao.y + jogador.sprite.dimensoes.y) {
                     // jogador perdeu - um inimigo chegou no "chão"
                     JOGO = gameOver;
-                } else if (vetorInimigos[i].sprite.posicao.x <= -LARGURA_DO_MUNDO/2 + vetorInimigos[i].sprite.dimensoes.x/2
-                          || vetorInimigos[i].sprite.posicao.x >= LARGURA_DO_MUNDO/2 - vetorInimigos[i].sprite.dimensoes.x/2) {
+                } else if (vetorInimigos[i].sprite.posicao.x <= vetorInimigos[i].sprite.dimensoes.x/2
+                          || vetorInimigos[i].sprite.posicao.x >= LARGURA_DO_MUNDO - vetorInimigos[i].sprite.dimensoes.x/2) {
                     // move verticalmente e altera a direção
                     for (int j = 0; j < QTD_INIMIGOS; j++) {
                         vetorInimigos[j].sprite.posicao.y -= 20;
@@ -326,17 +325,17 @@ void desenhaHud()
     // desenha o fundo
     glColor4f(1, 1, 1, 0.4);
     glBegin(GL_TRIANGLE_FAN);
-        glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 1);
-        glVertex3f(LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, 1);
-        glVertex3f(LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2 + ALTURA_HUD, 1);
-        glVertex3f(-LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2 + ALTURA_HUD, 1);
+        glVertex3f(0, 0, 1);
+        glVertex3f(LARGURA_DO_MUNDO, 0, 1);
+        glVertex3f(LARGURA_DO_MUNDO, ALTURA_HUD, 1);
+        glVertex3f(0, ALTURA_HUD, 1);
     glEnd();
 
     // mostra os pontos do jogador
     glColor4f(1, 1, 1, 1);
     snprintf(STR_PONTOS, 10, "%d", PONTOS); // converte int para string
-    escreveTexto(GLUT_BITMAP_HELVETICA_18, "PONTOS: ", LARGURA_DO_MUNDO/2 - 45, -ALTURA_DO_MUNDO/2 + 2);
-    escreveTexto(GLUT_BITMAP_HELVETICA_18, STR_PONTOS, LARGURA_DO_MUNDO/2 - 20, -ALTURA_DO_MUNDO/2 + 2);
+    escreveTexto(GLUT_BITMAP_HELVETICA_18, "PONTOS: ", LARGURA_DO_MUNDO - 45, 2);
+    escreveTexto(GLUT_BITMAP_HELVETICA_18, STR_PONTOS, LARGURA_DO_MUNDO - 20, 2);
 
     // desenha vidas
     for (int i = 0; i < jogador.vidas; i++)
@@ -357,24 +356,16 @@ void desenharMinhaCena()
         // movimentos();
     } else if (JOGO == pause) {
         glColor3f(1, 0, 0);
-        escreveTexto(GLUT_BITMAP_HELVETICA_18, "JOGO PAUSADO", -20, 0);
+        escreveTexto(GLUT_BITMAP_HELVETICA_18, "JOGO PAUSADO", LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2);
     } else if (JOGO == gameOver) {
         glColor3f(1, 0, 0);
-        escreveTexto(GLUT_BITMAP_HELVETICA_18, "GAME OVER", -15, 0);
+        escreveTexto(GLUT_BITMAP_HELVETICA_18, "GAME OVER", LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2);
     } else if (JOGO == vitoria) {
         glColor3f(0, 1, 0);
-        escreveTexto(GLUT_BITMAP_HELVETICA_18, "VITORIA", -10, 0);
+        escreveTexto(GLUT_BITMAP_HELVETICA_18, "VITORIA", LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2);
     }
 
     glutSwapBuffers();
-
-    fps++;
-    fim = time(NULL);
-    if (fim - inicio > 0) {
-        printf("fps: %ld\n", fps/(fim - inicio));
-        fps = 0;
-        inicio = fim;
-    }
 }
 
 void proximaFase()
@@ -471,8 +462,8 @@ void inicializaSprite(tipoSprite* sprite, float x, float y, float comprimento, f
 
 void inicializaHud()
 {
-    int x = -LARGURA_DO_MUNDO/2 + 20;
-    int y = -ALTURA_DO_MUNDO/2 + 5;
+    int x = 20;
+    int y = 5;
     int distancia = 10;
 
     for (int i = 0; i < MAX_VIDAS; i++) {
@@ -512,7 +503,7 @@ void inicializaTiro(tipoSprite* tiro, float x, float y)
 
 void inicializaChefao()
 {
-    inicializaSprite(&chefao.sprite, 0, ALTURA_DO_MUNDO * 0.4, 40, 40, 40/2);
+    inicializaSprite(&chefao.sprite, LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO * 0.8, 40, 40, 40/2);
     chefao.sprite.velocidade = 1;
     chefao.vidas = 5;
     chefao.rasante = FALSE;
@@ -532,8 +523,8 @@ void inicializaInimigos()
 {
 
     if (FASES < chefe) {
-        int x = -LARGURA_DO_MUNDO/2 + 20;
-        int y = ALTURA_DO_MUNDO * 0.4;
+        int x = 20;
+        int y = ALTURA_DO_MUNDO - 20;
         int dx = 20;
         int dy = 30;
         for (int i = 0; i < QTD_INIMIGOS; i++) {
@@ -545,7 +536,7 @@ void inicializaInimigos()
             x += dx;
             if ((i+1) % MAX_INIMIGOS_LINHA == 0) {
                 y -= dy;
-                x = -LARGURA_DO_MUNDO/2 + dx;
+                x = dx;
             }
         }
 
@@ -560,14 +551,14 @@ void inicializaInimigos()
 
 void inicializaJogador()
 {
-    inicializaSprite(&jogador.sprite, 0, -ALTURA_DO_MUNDO * 0.4, 20, 20, 20/2);
+    inicializaSprite(&jogador.sprite, LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO * 0.1, 20, 20, 20/2);
     jogador.sprite.velocidade = 2;
 }
 
 void inicializaJogo()
 {
     JOGO = ativo;
-    FASES = primeira;
+    FASES = chefe;
     PONTOS = 0;
     TIRO_ESPECIAL = FALSE;
     QTD_ESPECIAIS = 0;
@@ -587,13 +578,21 @@ void redimensiona(int w, int h)
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-LARGURA_DO_MUNDO/2, LARGURA_DO_MUNDO/2, -ALTURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2, -1, 1);
+    glOrtho(0, LARGURA_DO_MUNDO, 0, ALTURA_DO_MUNDO, -1, 1);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
 
 void inicializa()
 {
+    // inicialização do glut
+    glutInitContextVersion(1, 1);
+    glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+    glutInitWindowSize(800, 600);
+    glutInitWindowPosition(0, 0);
+    glutCreateWindow("Jogo");
+
     glClearColor(1, 1, 1, 1);
 
     // habilita mesclagem de cores
@@ -607,19 +606,12 @@ void inicializa()
 
 int main(int argc, char** argv)
 {
-    inicio = time(NULL);
-
     // inicializa gerador de números aleatórios
     srand(time(0));
 
-    // inicialização do glut
+    // inicializa o glut
     glutInit(&argc, argv);
-    glutInitContextVersion(1, 1);
-    glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowSize(800, 600);
-    glutInitWindowPosition(0, 0);
-    glutCreateWindow("Jogo");
+    inicializa();
 
     // registro de callbacks
     glutDisplayFunc(desenharMinhaCena);
@@ -627,10 +619,8 @@ int main(int argc, char** argv)
     glutKeyboardFunc(teclaPressionada);
     glutSpecialFunc(teclasEspeciais);
 
+    // agrupa funcoes de movimento em um só timer
     glutTimerFunc(16, movimentos, 0);
-
-    // configura variaveis do glut
-    inicializa();
 
     // inicializa variaveis do jogo
     inicializaJogo();
