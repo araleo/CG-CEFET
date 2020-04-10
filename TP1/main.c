@@ -82,7 +82,7 @@ void curvaBezier(tipoInimigo* inimigo)
     }
 }
 
-void ativaCurva()
+void ativaRasante()
 {
     for (int i = 0; i < QTD_INIMIGOS; i++) {
         if (vetorInimigos[i].rasante) {
@@ -96,7 +96,7 @@ void movimentos()
 {
     movimentaInimigos();
     movimentaProps();
-    ativaCurva();
+    ativaRasante();
     glutPostRedisplay();
     glutTimerFunc(16, movimentos, 0);
 }
@@ -162,6 +162,7 @@ void detectaTiro(tipoSprite* tiro)
                 if (alvo->sprite.ativo && detectaColisao(alvo->sprite, *tiro)) {
                     tiro->ativo = FALSE;
                     alvo->sprite.ativo = FALSE;
+                    // TODO mudar formula dos pontos
                     PONTOS += ((-alvo->sprite.posicao.y + 150) / 10) + 10;
                     if (alvo->especial)
                         PONTOS += 20;
@@ -584,7 +585,7 @@ void inicializaJogador()
 void inicializaJogo()
 {
     JOGO = ativo;
-    FASES = terceira;
+    FASES = primeira;
     PONTOS = 0;
     TIRO_ESPECIAL = FALSE;
     QTD_ESPECIAIS = 0;
