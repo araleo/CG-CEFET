@@ -24,4 +24,5 @@ typedef struct inimigoStruct
     int especial;
     int vidas;
     int rasante;
+    int vetorRasante;
 } tipoInimigo;

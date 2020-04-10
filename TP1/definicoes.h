@@ -8,3 +8,4 @@
 #define MAX_VIDAS 5
 #define VIDAS_INICIAIS 3
 #define MAX_ESPECIAIS 3
+#define MAX_RASANTES 2
