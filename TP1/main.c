@@ -32,6 +32,8 @@ int PONTOS;
 float T;
 char STR_PONTOS[10];
 
+tipoInimigo* inimigoRasante;
+
 void atualizaPontosCurva(tipoInimigo* inimigo)
 {
     tipoVetor2d inicioCurva = inimigo->sprite.posicao;
@@ -82,8 +84,12 @@ void curvaBezier(tipoInimigo* inimigo)
 
 void ativaCurva()
 {
-    if (chefao.rasante)
-        curvaBezier(&chefao);
+    for (int i = 0; i < QTD_INIMIGOS; i++) {
+        if (vetorInimigos[i].rasante) {
+            inimigoRasante = &vetorInimigos[i];
+            curvaBezier(inimigoRasante);
+        }
+    }
 }
 
 void movimentos()
@@ -170,9 +176,6 @@ void detectaTiro(tipoSprite* tiro)
             tipoInimigo* alvo = &chefao;
             if (alvo->sprite.ativo && detectaColisao(alvo->sprite, *tiro)) {
                 tiro->ativo = FALSE;
-                atualizaPontosCurva(&chefao);
-                chefao.rasante = TRUE;
-                ativaCurva(&chefao);
                 PONTOS += 10;
                 alvo->vidas -= 1;
                 if (alvo->vidas == 0) {
@@ -257,11 +260,12 @@ void movimentaInimigos()
     if (JOGO == ativo) {
         for (int i = 0; i < QTD_INIMIGOS; i++) {
             if (vetorInimigos[i].sprite.ativo) {
-                if (vetorInimigos[i].sprite.posicao.y <= jogador.sprite.posicao.y + jogador.sprite.dimensoes.y) {
+                if (vetorInimigos[i].sprite.posicao.y <= jogador.sprite.posicao.y + jogador.sprite.dimensoes.y
+                && !vetorInimigos[i].rasante) {
                     // jogador perdeu - um inimigo chegou no "chão"
                     JOGO = gameOver;
                 } else if (vetorInimigos[i].sprite.posicao.x <= vetorInimigos[i].sprite.dimensoes.x/2
-                          || vetorInimigos[i].sprite.posicao.x >= LARGURA_DO_MUNDO - vetorInimigos[i].sprite.dimensoes.x/2) {
+                || vetorInimigos[i].sprite.posicao.x >= LARGURA_DO_MUNDO - vetorInimigos[i].sprite.dimensoes.x/2) {
                     // move verticalmente e altera a direção
                     for (int j = 0; j < QTD_INIMIGOS; j++) {
                         vetorInimigos[j].sprite.posicao.y -= 20;
@@ -558,6 +562,12 @@ void inicializaInimigos()
 
         if (FASES == segunda || FASES == terceira)
             inicializaEspeciais();
+
+        if (FASES == terceira) {
+            int sorteio = rand() % QTD_INIMIGOS;
+            vetorInimigos[sorteio].rasante = TRUE;
+            atualizaPontosCurva(&vetorInimigos[sorteio]);
+        }
     }
 
     if (FASES == chefe)
@@ -574,7 +584,7 @@ void inicializaJogador()
 void inicializaJogo()
 {
     JOGO = ativo;
-    FASES = chefe;
+    FASES = terceira;
     PONTOS = 0;
     TIRO_ESPECIAL = FALSE;
     QTD_ESPECIAIS = 0;
