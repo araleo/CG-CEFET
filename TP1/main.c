@@ -26,7 +26,6 @@ tipoSprite iconeVidas[MAX_VIDAS];
 tipoSprite itemDrop;
 tipoVetor2d pontosCurva[6];
 
-
 int QTD_ESPECIAIS;
 int TIRO_ESPECIAL;
 int PONTOS;
@@ -44,11 +43,9 @@ void atualizaPontosCurva(tipoInimigo* inimigo)
     pontosCurva[1].y = aleatorioEntre(inicioCurva.y, jogador.sprite.posicao.y);
 
     pontosCurva[2].x = aleatorioEntre(0, LARGURA_DO_MUNDO);
-    // pontosCurva[2].y = -aleatorioEntre(30, 40);
     pontosCurva[2].y = 0;
 
     pontosCurva[3].x = pontosCurva[2].x;
-    // pontosCurva[3].y = aleatorioEntre(30, 40);
     pontosCurva[3].y = ALTURA_DO_MUNDO;
 
     pontosCurva[4].x = aleatorioEntre(0, LARGURA_DO_MUNDO);
@@ -56,13 +53,6 @@ void atualizaPontosCurva(tipoInimigo* inimigo)
 
     pontosCurva[5].x = inicioCurva.x;
     pontosCurva[5].y = inicioCurva.y;
-
-    printf("x = %f\ny = %f\n--\n", pontosCurva[0].x, pontosCurva[0].y);
-    printf("x = %f\ny = %f\n--\n", pontosCurva[1].x, pontosCurva[1].y);
-    printf("x = %f\ny = %f\n--\n", pontosCurva[2].x, pontosCurva[2].y);
-    printf("x = %f\ny = %f\n--\n", pontosCurva[3].x, pontosCurva[3].y);
-    printf("x = %f\ny = %f\n--\n", pontosCurva[4].x, pontosCurva[4].y);
-    printf("x = %f\ny = %f\n--\n", pontosCurva[5].x, pontosCurva[5].y);
 }
 
 void curvaBezier(tipoInimigo* inimigo)
@@ -72,7 +62,6 @@ void curvaBezier(tipoInimigo* inimigo)
     if (abs(inimigo->sprite.posicao.x - pontosCurva[2].x) <= 1
     && abs(inimigo->sprite.posicao.y - pontosCurva[2].y) <= 1) {
         inimigo->sprite.posicao = pontosCurva[3];
-        // glutPostRedisplay();
     }
 
     if (T <= 1) {
@@ -80,17 +69,15 @@ void curvaBezier(tipoInimigo* inimigo)
         inimigo->sprite.posicao.x = pFinal.x;
         inimigo->sprite.posicao.y = pFinal.y;
         T += 0.01;
-    } else if (T > 1 && T < 2) {
+    } else if (T <= 2) {
         pFinal = formulaBezier(pontosCurva[3], pontosCurva[4], pontosCurva[5], pFinal, T-1);
         inimigo->sprite.posicao.x = pFinal.x;
         inimigo->sprite.posicao.y = pFinal.y;
         T += 0.01;
-    } else if (T >= 2) {
+    } else {
         inimigo->rasante = FALSE;
         T = 0;
     }
-
-    printf("%f\n%f\n%f\n%f\n---\n", inimigo->sprite.posicao.x, pontosCurva[2].x, inimigo->sprite.posicao.y, pontosCurva[2].y);
 }
 
 void ativaCurva()
