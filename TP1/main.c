@@ -26,14 +26,11 @@ tipoSprite iconeVidas[MAX_VIDAS];
 tipoSprite itemDrop;
 tipoVetor2d* vetoresPontos[2];
 
-// int QTD_ESPECIAIS;
 int TIRO_ESPECIAL;
 int ATIVA_RASANTE;
-int PONTOS;
 float T;
+int PONTOS;
 char STR_PONTOS[10];
-
-tipoInimigo* inimigoRasante;
 
 void atualizaPontosCurva(tipoInimigo* inimigo, tipoVetor2d* pontosCurva)
 {
@@ -86,20 +83,31 @@ void curvaBezier(tipoInimigo* inimigo, tipoVetor2d* pontosCurva)
 void ativaRasante()
 {
     for (int i = 0; i < QTD_INIMIGOS; i++) {
-        if (vetorInimigos[i].rasante)
+        if (vetorInimigos[i].rasante) {
             curvaBezier(&vetorInimigos[i], vetoresPontos[vetorInimigos[i].vetorRasante]);
+        }
     }
 }
 
 void sorteiaRasante()
 {
-    if (FASES == terceira && rand() % 300 == 0 && !ATIVA_RASANTE) {
+    int qtdRasantes = 0;
+    int posicaoRasante = 0;
+    tipoInimigo rasanteControle;
+    for (int i = 0; i < QTD_INIMIGOS; i++) {
+        if (vetorInimigos[i].rasante && vetorInimigos[i].sprite.ativo) {
+            qtdRasantes++;
+            rasanteControle = vetorInimigos[i];
+        }
+    }
+
+    if (FASES == terceira && rand() % 100 == 0 && !ATIVA_RASANTE && qtdRasantes != 0) {
+        ATIVA_RASANTE = TRUE;
         for (int i = 0; i < QTD_INIMIGOS; i++) {
             if (vetorInimigos[i].rasante) {
                 atualizaPontosCurva(&vetorInimigos[i], vetoresPontos[vetorInimigos[i].vetorRasante]);
             }
         }
-        ATIVA_RASANTE = TRUE;
     }
 }
 
@@ -554,7 +562,6 @@ void inicializaRasantes()
             sorteio = rand() % QTD_INIMIGOS;
         vetorInimigos[sorteio].rasante = TRUE;
         vetorInimigos[sorteio].vetorRasante = i;
-        // atualizaPontosCurva(&vetorInimigos[sorteio], vetoresPontos[i]);
     }
 }
 
@@ -568,36 +575,38 @@ void inicializaEspeciais()
     }
 }
 
+void inicializaInimigosNormais()
+{
+    int x = 20;
+    int y = ALTURA_DO_MUNDO - 20;
+    int dx = 20;
+    int dy = 30;
+    for (int i = 0; i < QTD_INIMIGOS; i++) {
+        inicializaSprite(&vetorInimigos[i].sprite, x, y, 15, 15, 15/2);
+        vetorInimigos[i].sprite.velocidade = 0.5;
+        vetorInimigos[i].vidas = 1;
+        vetorInimigos[i].especial = FALSE;
+        vetorInimigos[i].rasante = FALSE;
+        x += dx;
+        if ((i+1) % MAX_INIMIGOS_LINHA == 0) {
+            y -= dy;
+            x = dx;
+        }
+    }
+}
+
 void inicializaInimigos()
 {
 
     if (FASES < chefe) {
-        int x = 20;
-        int y = ALTURA_DO_MUNDO - 20;
-        int dx = 20;
-        int dy = 30;
-        for (int i = 0; i < QTD_INIMIGOS; i++) {
-            inicializaSprite(&vetorInimigos[i].sprite, x, y, 15, 15, 15/2);
-            vetorInimigos[i].sprite.velocidade = 0.5;
-            vetorInimigos[i].vidas = 1;
-            vetorInimigos[i].especial = FALSE;
-            vetorInimigos[i].rasante = FALSE;
-            x += dx;
-            if ((i+1) % MAX_INIMIGOS_LINHA == 0) {
-                y -= dy;
-                x = dx;
-            }
-        }
+        inicializaInimigosNormais();
 
         if (FASES == segunda || FASES == terceira)
             inicializaEspeciais();
 
         if (FASES == terceira)
             inicializaRasantes();
-
-    }
-
-    if (FASES == chefe)
+    } else if (FASES == chefe)
         inicializaChefao();
 
 }
@@ -614,7 +623,6 @@ void inicializaJogo()
     FASES = terceira;
     PONTOS = 0;
     TIRO_ESPECIAL = FALSE;
-    // QTD_ESPECIAIS = 0;
     ATIVA_RASANTE = FALSE;
     T = 0;
     jogador.vidas = VIDAS_INICIAIS;
@@ -667,7 +675,6 @@ int main(int argc, char** argv)
     // TODO - free
     vetoresPontos[0] = (tipoVetor2d*) malloc(6 * sizeof(tipoVetor2d));
     vetoresPontos[1] = (tipoVetor2d*) malloc(6 * sizeof(tipoVetor2d));
-
 
     // inicializa o glut
     glutInit(&argc, argv);
