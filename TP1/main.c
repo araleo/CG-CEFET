@@ -32,6 +32,9 @@ float T;
 int PONTOS;
 char STR_PONTOS[10];
 
+long int timerRasanteInicio;
+long int timerRasanteFim;
+
 void atualizaPontosCurva(tipoInimigo* inimigo, tipoVetor2d* pontosCurva)
 {
     tipoVetor2d inicioCurva = inimigo->sprite.posicao;
@@ -91,18 +94,18 @@ void ativaRasante()
 
 void sorteiaRasante()
 {
+    timerRasanteFim = time(0);
     int qtdRasantes = 0;
-    int posicaoRasante = 0;
-    tipoInimigo rasanteControle;
+
     for (int i = 0; i < QTD_INIMIGOS; i++) {
         if (vetorInimigos[i].rasante && vetorInimigos[i].sprite.ativo) {
             qtdRasantes++;
-            rasanteControle = vetorInimigos[i];
         }
     }
 
-    if (FASES == terceira && rand() % 100 == 0 && !ATIVA_RASANTE && qtdRasantes != 0) {
+    if (FASES == terceira && timerRasanteFim - timerRasanteInicio > 15 && !ATIVA_RASANTE && qtdRasantes != 0) {
         ATIVA_RASANTE = TRUE;
+        timerRasanteInicio = timerRasanteFim;
         for (int i = 0; i < QTD_INIMIGOS; i++) {
             if (vetorInimigos[i].rasante) {
                 atualizaPontosCurva(&vetorInimigos[i], vetoresPontos[vetorInimigos[i].vetorRasante]);
@@ -420,6 +423,12 @@ void proximaFase()
     tiroInimigoEspecial.ativo = FALSE;
     tiroJogador.ativo = FALSE;
     itemDrop.ativo = FALSE;
+
+
+    if (FASES == terceira)
+        timerRasanteInicio = time(0);
+
+
     inicializaInimigos();
     glutPostRedisplay();
 }
