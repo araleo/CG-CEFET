@@ -203,7 +203,6 @@ void detectaTiro(tipoSprite* tiro)
                 if (alvo->sprite.ativo && detectaColisao(alvo->sprite, *tiro)) {
                     tiro->ativo = FALSE;
                     alvo->sprite.ativo = FALSE;
-                    // TODO mudar formula dos pontos
                     PONTOS += ((ALTURA_DO_MUNDO - alvo->sprite.posicao.y) / 10) + 10;
                     if (alvo->especial || alvo->rasante)
                         PONTOS += 20;
@@ -254,7 +253,17 @@ void movimentaProps()
     if (tiroJogador.posicao.y > ALTURA_DO_MUNDO)
         tiroJogador.ativo = FALSE;
 
-    if (FASES < chefe && tiroJogador.posicao.y > vetorInimigos[0].sprite.posicao.y + 30)
+    // determina o inimigo mais alto da formação
+    // para desativar o tiro do jogador depois que passar pelo mais alto
+    tipoInimigo inimigoMaisAlto;
+    for (int i = 0; i < (MAX_RASANTES + 1); i++) {
+        if (!vetorInimigos[i].rasante) {
+            inimigoMaisAlto = vetorInimigos[i];
+            break;
+        }
+    }
+
+    if (FASES < chefe && tiroJogador.posicao.y > inimigoMaisAlto.sprite.posicao.y + 30)
         tiroJogador.ativo = FALSE;
 
     if (JOGO == ativo && tiroJogador.ativo) {
@@ -440,10 +449,8 @@ void proximaFase()
     tiroJogador.ativo = FALSE;
     itemDrop.ativo = FALSE;
 
-
     if (FASES == terceira)
-        timerRasanteInicio = time(0);
-
+        timerRasanteInicio = time(0) - 15;
 
     inicializaInimigos();
     glutPostRedisplay();
@@ -645,7 +652,7 @@ void inicializaJogador()
 void inicializaJogo()
 {
     JOGO = ativo;
-    FASES = terceira;
+    FASES = primeira;
     PONTOS = 0;
     TIRO_ESPECIAL = FALSE;
     ATIVA_RASANTE = FALSE;
