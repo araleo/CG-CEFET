@@ -16,6 +16,7 @@ enum itens {vida, velocidade, tiro} ITENS;
 GLuint idTexturaFundo;
 GLuint idTexturaFundoChefe;
 GLuint idTexturaSheet;
+GLuint idTexturaChefao;
 
 tipoJogador jogador;
 tipoInimigo vetorInimigos[QTD_INIMIGOS];
@@ -342,7 +343,7 @@ void desenhaInimigos()
             }
         }
     } else if (chefao.sprite.ativo) {
-        desenhaSprite(idTexturaSheet, chefao.sprite, 0.413, 0.207, 0.090, 0.082);
+        desenhaSprite(idTexturaChefao, chefao.sprite, 0, 0, 1, 1);
     }
 
 }
@@ -434,7 +435,7 @@ void proximaFase()
     tiroJogador.ativo = FALSE;
     itemDrop.ativo = FALSE;
 
-    if (FASES == primeira)
+    if (FASES == terceira)
         timerRasanteInicio = time(0) - 15;
 
     inicializaInimigos();
@@ -565,9 +566,9 @@ void inicializaTiro(tipoSprite* tiro, float x, float y)
 
 void inicializaChefao()
 {
-    inicializaSprite(&chefao.sprite, LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO * 0.8, 40, 40, 40/2);
+    inicializaSprite(&chefao.sprite, LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO * 0.8, 60, 60, 60/2);
     chefao.sprite.velocidade = 1;
-    chefao.vidas = 5;
+    chefao.vidas = 10;
     chefao.rasante = FALSE;
 }
 
@@ -614,7 +615,6 @@ void inicializaInimigosNormais()
 
 void inicializaInimigos()
 {
-
     if (FASES < chefe) {
         inicializaInimigosNormais();
 
@@ -626,7 +626,6 @@ void inicializaInimigos()
 
     } else if (FASES == chefe)
         inicializaChefao();
-
 }
 
 void inicializaJogador()
@@ -637,7 +636,7 @@ void inicializaJogador()
 
 void inicializaJogo()
 {
-    FASES = terceira;
+    FASES = chefe;
     PONTOS = 0;
     TIRO_ESPECIAL = FALSE;
     ATIVA_RASANTE = FALSE;
@@ -684,6 +683,7 @@ void inicializa()
     idTexturaFundo = carregaTextura("imagens/fundo.png");
     idTexturaFundoChefe = carregaTextura("imagens/fundochefe.png");
     idTexturaSheet = carregaTextura("imagens/sheet.png");
+    idTexturaChefao = carregaTextura("imagens/chefao.png");
 }
 
 int main(int argc, char** argv)
