@@ -18,6 +18,29 @@ int aleatorioEntre(int x, int y)
     return (rand() % ((maior - menor) + 1)) + menor;
 }
 
+void atualizaPontosCurva(tipoInimigo* inimigo, tipoVetor2d* pontosCurva, tipoJogador* player)
+{
+    tipoVetor2d inicioCurva = inimigo->sprite.posicao;
+
+    pontosCurva[0].x = inicioCurva.x;
+    pontosCurva[0].y = inicioCurva.y;
+
+    pontosCurva[1].x = aleatorioEntre(0, LARGURA_DO_MUNDO);
+    pontosCurva[1].y = aleatorioEntre(inicioCurva.y, player->sprite.posicao.y);
+
+    pontosCurva[2].x = aleatorioEntre(0, LARGURA_DO_MUNDO);
+    pontosCurva[2].y = 0;
+
+    pontosCurva[3].x = pontosCurva[2].x;
+    pontosCurva[3].y = ALTURA_DO_MUNDO;
+
+    pontosCurva[4].x = aleatorioEntre(0, LARGURA_DO_MUNDO);
+    pontosCurva[4].y = aleatorioEntre(inicioCurva.y, ALTURA_DO_MUNDO);
+
+    pontosCurva[5].x = inicioCurva.x;
+    pontosCurva[5].y = inicioCurva.y;
+}
+
 tipoVetor2d formulaBezier(tipoVetor2d p0, tipoVetor2d p1, tipoVetor2d p2, tipoVetor2d pFinal, float t)
 {
     pFinal.x = pow(1 - t, 2) * p0.x + (1 - t) * 2 * t * p1.x + t * t * p2.x;

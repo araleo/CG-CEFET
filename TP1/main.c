@@ -14,6 +14,7 @@ enum fases {primeira, segunda, terceira, chefe} FASES;
 enum itens {vida, velocidade, tiro} ITENS;
 
 GLuint idTexturaFundo;
+GLuint idTexturaFundoChefe;
 GLuint idTexturaSheet;
 
 tipoJogador jogador;
@@ -34,29 +35,6 @@ char STR_PONTOS[10];
 
 long int timerRasanteInicio;
 long int timerRasanteFim;
-
-void atualizaPontosCurva(tipoInimigo* inimigo, tipoVetor2d* pontosCurva)
-{
-    tipoVetor2d inicioCurva = inimigo->sprite.posicao;
-
-    pontosCurva[0].x = inicioCurva.x;
-    pontosCurva[0].y = inicioCurva.y;
-
-    pontosCurva[1].x = aleatorioEntre(0, LARGURA_DO_MUNDO);
-    pontosCurva[1].y = aleatorioEntre(inicioCurva.y, jogador.sprite.posicao.y);
-
-    pontosCurva[2].x = aleatorioEntre(0, LARGURA_DO_MUNDO);
-    pontosCurva[2].y = 0;
-
-    pontosCurva[3].x = pontosCurva[2].x;
-    pontosCurva[3].y = ALTURA_DO_MUNDO;
-
-    pontosCurva[4].x = aleatorioEntre(0, LARGURA_DO_MUNDO);
-    pontosCurva[4].y = aleatorioEntre(inicioCurva.y, ALTURA_DO_MUNDO);
-
-    pontosCurva[5].x = inicioCurva.x;
-    pontosCurva[5].y = inicioCurva.y;
-}
 
 void curvaBezier(tipoInimigo* inimigo, tipoVetor2d* pontosCurva)
 {
@@ -112,7 +90,7 @@ void sorteiaRasante()
         timerRasanteInicio = timerRasanteFim;
         for (int i = 0; i < QTD_INIMIGOS; i++) {
             if (vetorInimigos[i].rasante && vetorInimigos[i].sprite.ativo) {
-                atualizaPontosCurva(&vetorInimigos[i], vetoresPontos[vetorInimigos[i].vetorRasante]);
+                atualizaPontosCurva(&vetorInimigos[i], vetoresPontos[vetorInimigos[i].vetorRasante], &jogador);
             }
         }
     }
@@ -127,21 +105,6 @@ void detectaColisaoRasante()
         }
     }
 }
-
-void movimentos()
-{
-    movimentaProps();
-    sorteiaRasante();
-    if (ATIVA_RASANTE) {
-        ativaRasante();
-        detectaColisaoRasante();
-    }
-    else
-        movimentaInimigos();
-    glutPostRedisplay();
-    glutTimerFunc(16, movimentos, 0);
-}
-
 
 void detectaItem()
 {
@@ -171,17 +134,6 @@ void sorteiaItem(tipoInimigo inimigo)
         }
     }
     // glutPostRedisplay();
-}
-
-void inimigoAtira()
-{
-    tipoInimigo inimigo = vetorInimigos[rand() % QTD_INIMIGOS];
-    if (inimigo.especial && inimigo.sprite.ativo && !tiroInimigoEspecial.ativo) {
-        inicializaTiro(&tiroInimigoEspecial, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
-    } else {
-        if (!tiroInimigo.ativo && inimigo.sprite.ativo)
-            inicializaTiro(&tiroInimigo, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
-    }
 }
 
 void detectaTiro(tipoSprite* tiro)
@@ -227,6 +179,40 @@ void detectaTiro(tipoSprite* tiro)
             }
         }
     }
+}
+
+void inimigoAtira()
+{
+    tipoInimigo inimigo = vetorInimigos[rand() % QTD_INIMIGOS];
+    if (inimigo.especial && inimigo.sprite.ativo && !tiroInimigoEspecial.ativo) {
+        inicializaTiro(&tiroInimigoEspecial, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
+    } else {
+        if (!tiroInimigo.ativo && inimigo.sprite.ativo)
+            inicializaTiro(&tiroInimigo, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
+    }
+}
+
+void jogadorAtira()
+{
+    if (JOGO == ativo && !tiroJogador.ativo) {
+        inicializaTiro(&tiroJogador, jogador.sprite.posicao.x, jogador.sprite.posicao.y + jogador.sprite.dimensoes.y/2);
+        desenhaSprite(idTexturaSheet, tiroJogador, 0.833, 0.339, 0.008, 0.036);
+        // glutPostRedisplay();
+    }
+}
+
+void movimentos()
+{
+    movimentaProps();
+    sorteiaRasante();
+    if (ATIVA_RASANTE) {
+        ativaRasante();
+        detectaColisaoRasante();
+    }
+    else
+        movimentaInimigos();
+    glutPostRedisplay();
+    glutTimerFunc(16, movimentos, 0);
 }
 
 void movimentaProps()
@@ -283,15 +269,6 @@ void movimentaProps()
     // glutPostRedisplay();
 }
 
-void jogadorAtira()
-{
-    if (JOGO == ativo && !tiroJogador.ativo) {
-        inicializaTiro(&tiroJogador, jogador.sprite.posicao.x, jogador.sprite.posicao.y + jogador.sprite.dimensoes.y/2);
-        desenhaSprite(idTexturaSheet, tiroJogador, 0.833, 0.339, 0.008, 0.036);
-        // glutPostRedisplay();
-    }
-}
-
 void movimentaJogador(char lado)
 {
     if (lado == 'e') {
@@ -304,6 +281,11 @@ void movimentaJogador(char lado)
         }
     }
     // glutPostRedisplay();
+}
+
+void movimentaChefao()
+{
+
 }
 
 void movimentaInimigos()
@@ -421,7 +403,10 @@ void desenharMinhaCena()
     glColor3f(1, 1, 1);
 
     // desenhos
-    desenhaFundoJogo(idTexturaFundo);
+    if (FASES == chefe)
+        desenhaFundoJogo(idTexturaFundoChefe);
+    else
+        desenhaFundoJogo(idTexturaFundo);
     desenhaFase();
     desenhaHud();
 
@@ -449,7 +434,7 @@ void proximaFase()
     tiroJogador.ativo = FALSE;
     itemDrop.ativo = FALSE;
 
-    if (FASES == terceira)
+    if (FASES == primeira)
         timerRasanteInicio = time(0) - 15;
 
     inicializaInimigos();
@@ -638,6 +623,7 @@ void inicializaInimigos()
 
         if (FASES == terceira)
             inicializaRasantes();
+
     } else if (FASES == chefe)
         inicializaChefao();
 
@@ -651,8 +637,7 @@ void inicializaJogador()
 
 void inicializaJogo()
 {
-    JOGO = ativo;
-    FASES = primeira;
+    FASES = terceira;
     PONTOS = 0;
     TIRO_ESPECIAL = FALSE;
     ATIVA_RASANTE = FALSE;
@@ -665,6 +650,7 @@ void inicializaJogo()
     inicializaJogador();
     inicializaInimigos();
     inicializaHud();
+    JOGO = ativo;
     glutPostRedisplay();
 }
 
@@ -696,6 +682,7 @@ void inicializa()
 
     // carrega texturas
     idTexturaFundo = carregaTextura("imagens/fundo.png");
+    idTexturaFundoChefe = carregaTextura("imagens/fundochefe.png");
     idTexturaSheet = carregaTextura("imagens/sheet.png");
 }
 

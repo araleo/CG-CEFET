@@ -16,3 +16,4 @@ void inicializaChefao();
 void movimentaInimigos();
 void movimentaProps();
 int aleatorioEntre(int x, int y);
+void atualizaPontosCurva(tipoInimigo* inimigo, tipoVetor2d* pontosCurva, tipoJogador* player);
