@@ -67,26 +67,28 @@ void curvaBezier(tipoInimigo* inimigo, tipoVetor2d* pontosCurva)
         inimigo->sprite.posicao = pontosCurva[3];
     }
 
-    if (T <= 1) {
-        pFinal = formulaBezier(pontosCurva[0], pontosCurva[1], pontosCurva[2], pFinal, T);
-        inimigo->sprite.posicao.x = pFinal.x;
-        inimigo->sprite.posicao.y = pFinal.y;
-        T += 0.01;
-    } else if (T <= 2) {
-        pFinal = formulaBezier(pontosCurva[3], pontosCurva[4], pontosCurva[5], pFinal, T-1);
-        inimigo->sprite.posicao.x = pFinal.x;
-        inimigo->sprite.posicao.y = pFinal.y;
-        T += 0.01;
-    } else {
-        ATIVA_RASANTE = FALSE;
-        T = 0;
+    if (JOGO == ativo) {
+        if (T <= 1) {
+            pFinal = formulaBezier(pontosCurva[0], pontosCurva[1], pontosCurva[2], pFinal, T);
+            inimigo->sprite.posicao.x = pFinal.x;
+            inimigo->sprite.posicao.y = pFinal.y;
+            T += 0.005;
+        } else if (T <= 2) {
+            pFinal = formulaBezier(pontosCurva[3], pontosCurva[4], pontosCurva[5], pFinal, T-1);
+            inimigo->sprite.posicao.x = pFinal.x;
+            inimigo->sprite.posicao.y = pFinal.y;
+            T += 0.005;
+        } else {
+            ATIVA_RASANTE = FALSE;
+            T = 0;
+        }
     }
 }
 
 void ativaRasante()
 {
     for (int i = 0; i < QTD_INIMIGOS; i++) {
-        if (vetorInimigos[i].rasante) {
+        if (vetorInimigos[i].rasante && vetorInimigos[i].sprite.ativo) {
             curvaBezier(&vetorInimigos[i], vetoresPontos[vetorInimigos[i].vetorRasante]);
         }
     }
@@ -103,13 +105,25 @@ void sorteiaRasante()
         }
     }
 
-    if (FASES == terceira && timerRasanteFim - timerRasanteInicio > 15 && !ATIVA_RASANTE && qtdRasantes != 0) {
+    if (qtdRasantes == 0) {
+        ATIVA_RASANTE = FALSE;
+    } else if (FASES == terceira && timerRasanteFim - timerRasanteInicio > 15 && !ATIVA_RASANTE) {
         ATIVA_RASANTE = TRUE;
         timerRasanteInicio = timerRasanteFim;
         for (int i = 0; i < QTD_INIMIGOS; i++) {
-            if (vetorInimigos[i].rasante) {
+            if (vetorInimigos[i].rasante && vetorInimigos[i].sprite.ativo) {
                 atualizaPontosCurva(&vetorInimigos[i], vetoresPontos[vetorInimigos[i].vetorRasante]);
             }
+        }
+    }
+}
+
+void detectaColisaoRasante()
+{
+    for (int i = 0; i < QTD_INIMIGOS; i++) {
+        tipoInimigo inimigo = vetorInimigos[i];
+        if (inimigo.sprite.ativo && inimigo.rasante && detectaColisao(jogador.sprite, inimigo.sprite)) {
+            JOGO = gameOver;
         }
     }
 }
@@ -118,8 +132,10 @@ void movimentos()
 {
     movimentaProps();
     sorteiaRasante();
-    if (ATIVA_RASANTE)
+    if (ATIVA_RASANTE) {
         ativaRasante();
+        detectaColisaoRasante();
+    }
     else
         movimentaInimigos();
     glutPostRedisplay();
@@ -188,8 +204,8 @@ void detectaTiro(tipoSprite* tiro)
                     tiro->ativo = FALSE;
                     alvo->sprite.ativo = FALSE;
                     // TODO mudar formula dos pontos
-                    PONTOS += ((-alvo->sprite.posicao.y + 150) / 10) + 10;
-                    if (alvo->especial)
+                    PONTOS += ((ALTURA_DO_MUNDO - alvo->sprite.posicao.y) / 10) + 10;
+                    if (alvo->especial || alvo->rasante)
                         PONTOS += 20;
                     if (!verificaVitoria()) {
                         if (!itemDrop.ativo)
@@ -404,13 +420,13 @@ void desenharMinhaCena()
         // movimentos();
     } else if (JOGO == pause) {
         glColor3f(1, 0, 0);
-        escreveTexto(GLUT_BITMAP_HELVETICA_18, "JOGO PAUSADO", LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2);
+        escreveTexto(GLUT_BITMAP_HELVETICA_18, "JOGO PAUSADO", LARGURA_DO_MUNDO/2 - 10, ALTURA_DO_MUNDO/2);
     } else if (JOGO == gameOver) {
         glColor3f(1, 0, 0);
-        escreveTexto(GLUT_BITMAP_HELVETICA_18, "GAME OVER", LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2);
+        escreveTexto(GLUT_BITMAP_HELVETICA_18, "GAME OVER", LARGURA_DO_MUNDO/2 - 10, ALTURA_DO_MUNDO/2);
     } else if (JOGO == vitoria) {
         glColor3f(0, 1, 0);
-        escreveTexto(GLUT_BITMAP_HELVETICA_18, "VITORIA", LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO/2);
+        escreveTexto(GLUT_BITMAP_HELVETICA_18, "VITORIA", LARGURA_DO_MUNDO/2 - 10, ALTURA_DO_MUNDO/2);
     }
 
     glutSwapBuffers();
