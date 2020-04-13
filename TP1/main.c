@@ -140,7 +140,7 @@ void sorteiaItem(tipoInimigo inimigo)
 void detectaTiro(tipoSprite* tiro)
 {
     if ((tiro == &tiroInimigo || tiro == &tiroInimigoEspecial) && tiro->ativo) {
-        // tido do jogador
+        // tido dos inimigos
         tipoJogador* alvo = &jogador;
         if (detectaColisao(alvo->sprite, *tiro)) {
             tiro->ativo = FALSE;
@@ -150,7 +150,8 @@ void detectaTiro(tipoSprite* tiro)
         }
     } else if (tiro == &tiroJogador && tiro->ativo) {
         if (FASES < chefe) {
-            // tiro dos inimigos
+            // tiro do jogador
+            // alvos normais
             for (int i = 0; i < QTD_INIMIGOS; i++) {
                 tipoInimigo* alvo = &vetorInimigos[i];
                 if (alvo->sprite.ativo && detectaColisao(alvo->sprite, *tiro)) {
@@ -159,22 +160,24 @@ void detectaTiro(tipoSprite* tiro)
                     PONTOS += ((ALTURA_DO_MUNDO - alvo->sprite.posicao.y) / 10) + 10;
                     if (alvo->especial || alvo->rasante)
                         PONTOS += 20;
-                    if (!verificaVitoria()) {
-                        if (!itemDrop.ativo)
-                            sorteiaItem(*alvo);
+                    if (!verificaVitoria() && !itemDrop.ativo) {
+                        sorteiaItem(*alvo);
                     }
                 }
             }
         } else {
-            // tiro do chefao
+            // alvo chefao
             tipoInimigo* alvo = &chefao;
             if (alvo->sprite.ativo && detectaColisao(alvo->sprite, *tiro)) {
                 tiro->ativo = FALSE;
                 PONTOS += 10;
-                alvo->vidas -= 1;
-                if (alvo->vidas == 0) {
+                if (TIRO_ESPECIAL)
+                    alvo->vidas -= 2;
+                else
+                    alvo->vidas -= 1;
+                if (alvo->vidas <= 0) {
                     alvo->sprite.ativo = FALSE;
-                    PONTOS += 100;
+                    PONTOS += 150;
                     JOGO = vitoria;
                 }
             }
@@ -184,8 +187,14 @@ void detectaTiro(tipoSprite* tiro)
 
 void inimigoAtira()
 {
-    tipoInimigo inimigo = vetorInimigos[rand() % QTD_INIMIGOS];
-    if (inimigo.especial && inimigo.sprite.ativo && !tiroInimigoEspecial.ativo) {
+    tipoInimigo inimigo;
+
+    if (FASES < chefe)
+        inimigo = vetorInimigos[rand() % QTD_INIMIGOS];
+    else
+        inimigo = chefao;
+
+    if ((inimigo.chefao || inimigo.especial) && inimigo.sprite.ativo && !tiroInimigoEspecial.ativo) {
         inicializaTiro(&tiroInimigoEspecial, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
     } else {
         if (!tiroInimigo.ativo && inimigo.sprite.ativo)
@@ -284,37 +293,48 @@ void movimentaJogador(char lado)
     // glutPostRedisplay();
 }
 
-void movimentaChefao()
+void moveInimigo(tipoInimigo* inimigo)
 {
-
+    if (inimigo->sprite.posicao.y <= jogador.sprite.posicao.y + jogador.sprite.dimensoes.y
+    && !inimigo->rasante) {
+        // jogador perdeu - um inimigo chegou no "chão"
+        JOGO = gameOver;
+    } else if (inimigo->sprite.posicao.x <= inimigo->sprite.dimensoes.x/2
+    || inimigo->sprite.posicao.x >= LARGURA_DO_MUNDO - inimigo->sprite.dimensoes.x/2) {
+        // inimigo chegou em um dos cantos laterais da tela
+        // move verticalmente e altera a direção
+        if (FASES == chefe) {
+            inimigo->sprite.posicao.y -= 20;
+            inimigo->sprite.velocidade *= -1;
+            inimigo->sprite.posicao.x += inimigo->sprite.velocidade;
+        } else {
+            for (int i = 0; i < QTD_INIMIGOS; i++) {
+                vetorInimigos[i].sprite.posicao.y -= 20;
+                vetorInimigos[i].sprite.velocidade *= -1;
+                vetorInimigos[i].sprite.posicao.x += vetorInimigos[i].sprite.velocidade;
+            }
+        }
+    } else {
+        // move horizontalmente
+        inimigo->sprite.posicao.x += inimigo->sprite.velocidade;
+        inimigoAtira();
+    }
 }
 
 void movimentaInimigos()
 {
     if (JOGO == ativo) {
-        for (int i = 0; i < QTD_INIMIGOS; i++) {
-            if (vetorInimigos[i].sprite.ativo) {
-                if (vetorInimigos[i].sprite.posicao.y <= jogador.sprite.posicao.y + jogador.sprite.dimensoes.y
-                && !vetorInimigos[i].rasante) {
-                    // jogador perdeu - um inimigo chegou no "chão"
-                    JOGO = gameOver;
-                } else if (vetorInimigos[i].sprite.posicao.x <= vetorInimigos[i].sprite.dimensoes.x/2
-                || vetorInimigos[i].sprite.posicao.x >= LARGURA_DO_MUNDO - vetorInimigos[i].sprite.dimensoes.x/2) {
-                    // move verticalmente e altera a direção
-                    for (int j = 0; j < QTD_INIMIGOS; j++) {
-                        vetorInimigos[j].sprite.posicao.y -= 20;
-                        vetorInimigos[j].sprite.velocidade *= -1;
-                        vetorInimigos[j].sprite.posicao.x += vetorInimigos[j].sprite.velocidade;
-                    }
-                } else {
-                    // move horizontalmente
-                    vetorInimigos[i].sprite.posicao.x += vetorInimigos[i].sprite.velocidade;
-                    inimigoAtira();
-                }
+        if (FASES == chefe) {
+            moveInimigo(&chefao);
+        } else {
+            for (int i = 0; i < QTD_INIMIGOS; i++) {
+                if (vetorInimigos[i].sprite.ativo)
+                    moveInimigo(&vetorInimigos[i]);
+
             }
-            // glutPostRedisplay();
         }
     }
+    // glutPostRedisplay();
 }
 
 void desenhaItens()
@@ -567,9 +587,10 @@ void inicializaTiro(tipoSprite* tiro, float x, float y)
 void inicializaChefao()
 {
     inicializaSprite(&chefao.sprite, LARGURA_DO_MUNDO/2, ALTURA_DO_MUNDO * 0.8, 60, 60, 60/2);
-    chefao.sprite.velocidade = 1;
+    chefao.sprite.velocidade = 0.7;
     chefao.vidas = 10;
     chefao.rasante = FALSE;
+    chefao.chefao = TRUE;
 }
 
 void inicializaRasantes()
@@ -604,6 +625,7 @@ void inicializaInimigosNormais()
         vetorInimigos[i].sprite.velocidade = 0.5;
         vetorInimigos[i].vidas = 1;
         vetorInimigos[i].especial = FALSE;
+        vetorInimigos[i].chefao = FALSE;
         vetorInimigos[i].rasante = FALSE;
         x += dx;
         if ((i+1) % MAX_INIMIGOS_LINHA == 0) {
@@ -636,7 +658,7 @@ void inicializaJogador()
 
 void inicializaJogo()
 {
-    FASES = chefe;
+    FASES = primeira;
     PONTOS = 0;
     TIRO_ESPECIAL = FALSE;
     ATIVA_RASANTE = FALSE;
