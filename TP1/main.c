@@ -295,7 +295,7 @@ void movimentaJogador(char lado)
 
 void moveInimigo(tipoInimigo* inimigo)
 {
-    if (inimigo->sprite.posicao.y <= jogador.sprite.posicao.y + jogador.sprite.dimensoes.y
+    if (inimigo->sprite.posicao.y - inimigo->sprite.raio <= jogador.sprite.posicao.y + jogador.sprite.raio
     && !inimigo->rasante) {
         // jogador perdeu - um inimigo chegou no "chão"
         JOGO = gameOver;
@@ -713,7 +713,7 @@ int main(int argc, char** argv)
     // inicializa gerador de números aleatórios
     srand(time(0));
 
-    // TODO - free
+    // aloca espaço para os vetores de pontos para a curva de Bezier
     vetoresPontos[0] = (tipoVetor2d*) malloc(6 * sizeof(tipoVetor2d));
     vetoresPontos[1] = (tipoVetor2d*) malloc(6 * sizeof(tipoVetor2d));
 
@@ -735,6 +735,10 @@ int main(int argc, char** argv)
 
     // main loop
     glutMainLoop();
+
+    // libera a memoria dos vetores da curva de Bezier
+    free(vetoresPontos[0]);
+    free(vetoresPontos[1]);
 
     return 0;
 }
