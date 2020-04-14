@@ -187,19 +187,12 @@ void detectaTiro(tipoSprite* tiro)
 
 void inimigoAtira()
 {
-    tipoInimigo inimigo;
+    tipoInimigo inimigo = FASES < chefe ? vetorInimigos[rand() % QTD_INIMIGOS] : chefao;
 
-    if (FASES < chefe)
-        inimigo = vetorInimigos[rand() % QTD_INIMIGOS];
-    else
-        inimigo = chefao;
-
-    if ((inimigo.chefao || inimigo.especial) && inimigo.sprite.ativo && !tiroInimigoEspecial.ativo) {
+    if ((inimigo.chefao || inimigo.especial) && inimigo.sprite.ativo && !tiroInimigoEspecial.ativo)
         inicializaTiro(&tiroInimigoEspecial, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
-    } else {
-        if (!tiroInimigo.ativo && inimigo.sprite.ativo)
-            inicializaTiro(&tiroInimigo, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
-    }
+    else if (!tiroInimigo.ativo && inimigo.sprite.ativo)
+        inicializaTiro(&tiroInimigo, inimigo.sprite.posicao.x, inimigo.sprite.posicao.y);
 }
 
 void jogadorAtira()
@@ -431,9 +424,7 @@ void desenharMinhaCena()
     desenhaFase();
     desenhaHud();
 
-    if (JOGO == ativo) {
-        // movimentos();
-    } else if (JOGO == pause) {
+    if (JOGO == pause) {
         glColor3f(1, 0, 0);
         escreveTexto(GLUT_BITMAP_HELVETICA_18, "JOGO PAUSADO", LARGURA_DO_MUNDO/2 - 10, ALTURA_DO_MUNDO/2);
     } else if (JOGO == gameOver) {
@@ -470,8 +461,6 @@ int verificaVitoria()
 
     if (FASES < chefe)
         proximaFase();
-    else if (FASES == terceira)
-        JOGO = vitoria;
 }
 
 void verificaGameOver()
@@ -714,8 +703,8 @@ int main(int argc, char** argv)
     srand(time(0));
 
     // aloca espaço para os vetores de pontos para a curva de Bezier
-    vetoresPontos[0] = (tipoVetor2d*) malloc(6 * sizeof(tipoVetor2d));
-    vetoresPontos[1] = (tipoVetor2d*) malloc(6 * sizeof(tipoVetor2d));
+    vetoresPontos[0] = (tipoVetor2d*) malloc(6 * sizeof(tipoVetor2d*));
+    vetoresPontos[1] = (tipoVetor2d*) malloc(6 * sizeof(tipoVetor2d*));
 
     // inicializa o glut
     glutInit(&argc, argv);
