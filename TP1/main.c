@@ -1,9 +1,12 @@
-#include <SOIL/SOIL.h>
-#include <GL/glew.h>
-#include <GL/freeglut.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
+#include <SOIL/SOIL.h>
+#include <GL/glew.h>
+#include <GL/freeglut.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL.h>
 
 #include "estruturas.h"
 #include "declaracoes.h"
@@ -91,7 +94,7 @@ void sorteiaRasante()
         timerRasanteInicio = timerRasanteFim;
         for (int i = 0; i < QTD_INIMIGOS; i++) {
             if (vetorInimigos[i].rasante && vetorInimigos[i].sprite.ativo) {
-                atualizaPontosCurva(&vetorInimigos[i], vetoresPontos[vetorInimigos[i].vetorRasante], &jogador);
+                atualizaPontosCurva(vetoresPontos[vetorInimigos[i].vetorRasante], &vetorInimigos[i], &jogador);
             }
         }
     }
@@ -660,6 +663,7 @@ void inicializaJogo()
     inicializaJogador();
     inicializaInimigos();
     inicializaHud();
+    tocaSom("sons/tema.wav", -1);
     JOGO = ativo;
     glutPostRedisplay();
 }
